@@ -103,7 +103,7 @@ void TaikoRuleset::Draw() {
 
     //Draw barlines
     int barline_out_count = 0;
-    printf("%i\n", m_first_effect_point);
+    //printf("%i\n", m_first_effect_point);
     for (int i = m_first_effect_point; i < beatmap->m_effect_point_count; ++i) {
         TaikoEffectPoint *effect_point = &(beatmap->m_effect_points[i]);
         float position = TimeToPosition(effect_point->time, current_time);
@@ -187,18 +187,17 @@ bool TaikoRuleset::HandleHit(const RulesetInputMessage &message) {
     auto beatmap = GetBeatmap<TaikoBeatmap>();
     BeatmapPlayer *player = GetPlayer();
 
-    //Current time in ms
-    int input_time = (int)(message.time * 1000.f);
-
     //Check if there are some hits remaining
     if (m_first_hit_index >= beatmap->m_hit_count) return false;
 
-    //Get the hit and its time relative to the target
+    //Get the next hit
     TaikoHit *hit = &(beatmap->m_hits[m_first_hit_index]);
-    int hit_relative_time = hit->time - input_time;
+
+    //Get the time difference between the keypress and a perfect (0ms) hit
+    int hit_relative_time = hit->time - message.time;
 
     //Check if we can reach it
-    if (hit_relative_time > m_miss_hitwindow) return false;
+    if (hit_relative_time < m_miss_hitwindow || hit_relative_time > m_miss_hitwindow) return false;
 
     if (message.action == Middle1 || message.action == Middle2) {
         //Wrong color (hit is blue, should be red)

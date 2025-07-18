@@ -42,7 +42,7 @@ struct RulesetInput {
 //When one of the keys of the ruleset's m_actions is pressed this struct is sent to the HandleInput method of the ruleset
 struct RulesetInputMessage {
     uint32_t action;
-    float time; //time at which the action occurred relative to the start of the beatmap
+    int time; //time at which the action occurred relative to the start of the beatmap in ms
 };
 
 // Some default ratings as an example, these shouldn't be used directly.

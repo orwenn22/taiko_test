@@ -9,7 +9,7 @@
 
 struct InputEvent {
     int key;
-    uint64_t timestamp_ms;  // Time in milliseconds since game start
+    uint64_t timestamp_ms;  // Time in milliseconds since last frame
 };
 
 #if !SINGLE_THREAD_INPUT

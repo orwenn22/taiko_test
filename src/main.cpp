@@ -48,11 +48,15 @@ int main() {
 
         player->Update(GetFrameTime());
 
-        BeginDrawing();
+        SetLastFrameTimeToNow();
+
+        BeginDrawing(); //This calls it what makes this tread wait in order to reach the target framerate
         ClearBackground(BLACK);
         player->Draw();
         DrawFPS(10, 10);
-        DrawText(TextFormat("%d IPF", GetInputThreadIterations()), 90, 10, 20, GREEN);
+        int input_iterations = GetInputThreadIterations();
+        if (input_iterations < 5) printf("Low input thread iteration count\n");
+        DrawText(TextFormat("%d IPF", input_iterations), 90, 10, 20, GREEN);
         EndDrawing();
     }
 

@@ -19,7 +19,7 @@ static std::atomic<int> s_input_thread_iterations(0);
 static void CheckAllKeys() {
     for (int i = 0; i < 128; ++i) {
         if (IsKeyPressed(i)) {
-            s_input_queue.emplace(i, GetTimestampMs());
+            s_input_queue.emplace(i, GetTimestampSinceLastFrameMs());
         }
     }
 }
@@ -27,7 +27,7 @@ static void CheckAllKeys() {
 static void CheckSpecifiedKeys() {
     for (size_t i = 0; i < s_count; ++i) {
         if (IsKeyPressed(s_keys[i])) {
-            s_input_queue.push(InputEvent(s_keys[i], GetTimestampMs()));
+            s_input_queue.push(InputEvent(s_keys[i], GetTimestampSinceLastFrameMs()));
         }
     }
 }
@@ -44,7 +44,8 @@ void InputThreadMain() {
         if (s_keys == nullptr || s_count == 0) CheckAllKeys();
         else CheckSpecifiedKeys();
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        //std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        std::this_thread::sleep_for(std::chrono::nanoseconds(100000)); //0.1ms
     }
 }
 

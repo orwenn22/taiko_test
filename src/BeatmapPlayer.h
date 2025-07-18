@@ -32,6 +32,8 @@ public:
 private:
     Ruleset *m_ruleset;
     Beatmap *m_beatmap;
+
+    //Time since start of beatmap (in seconds)
     float m_time;
 
     int *m_judgements;

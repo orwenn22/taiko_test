@@ -23,7 +23,6 @@ BeatmapPlayer::BeatmapPlayer(Ruleset *ruleset, Beatmap *beatmap) : m_ruleset(rul
 
     m_ruleset->OnBeatmapLoaded();
     m_ruleset->OnGameStart();
-    SetGameStartTimeToNow();
 }
 
 BeatmapPlayer::~BeatmapPlayer() {
@@ -32,8 +31,13 @@ BeatmapPlayer::~BeatmapPlayer() {
 
 //#if !SINGLE_THREAD_INPUT
 void BeatmapPlayer::HandleInput(const InputEvent &input) {
+    //we keep track of the time since the start of the beatmap in a float (
+    int last_time_ms = (int)(m_time*1000.f);
+    int press_time = last_time_ms+(int)input.timestamp_ms;
+
     for (int i = 0; i < m_ruleset->m_input_count; ++i) {
-        if (input.key == (int) m_ruleset->m_inputs[i].key) m_ruleset->HandleInput({m_ruleset->m_inputs[i].action, (float)input.timestamp_ms/1000.f});
+        printf("press_time: %d ms\n", press_time);
+        if (input.key == (int) m_ruleset->m_inputs[i].key) m_ruleset->HandleInput({m_ruleset->m_inputs[i].action, press_time});
     }
 }
 //#endif
@@ -42,7 +46,7 @@ void BeatmapPlayer::HandleInput(const InputEvent &input) {
 void BeatmapPlayer::Update(float dt) {
 #if SINGLE_THREAD_INPUT
     for (int i = 0; i < m_ruleset->m_input_count; ++i) {
-        if (IsKeyPressed((int) m_ruleset->m_inputs[i].key)) m_ruleset->HandleInput({m_ruleset->m_inputs[i].action, m_time});
+        if (IsKeyPressed((int) m_ruleset->m_inputs[i].key)) m_ruleset->HandleInput({m_ruleset->m_inputs[i].action, (int)(m_time*1000.f)});
     }
 #endif
 
