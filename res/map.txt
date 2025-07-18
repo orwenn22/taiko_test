@@ -1,0 +1,45 @@
+﻿﻿osu file format v128
+
+[General]
+AudioFilename: audio.mp3
+AudioLeadIn: 0
+PreviewTime: -1
+Countdown: 0
+SampleSet: Normal
+StackLeniency: 0.7
+Mode: 1
+LetterboxInBreaks: 0
+WidescreenStoryboard: 1
+
+[Editor]
+DistanceSpacing: 1
+BeatDivisor: 4
+GridSize: 0
+TimelineZoom: 1
+
+[Metadata]
+Title: Hito Mania
+Artist:
+Creator: orwenn
+Version:
+
+[Difficulty]
+HPDrainRate: 5
+CircleSize: 5
+OverallDifficulty: 5
+ApproachRate: 5
+SliderMultiplier: 1.4
+SliderTickRate: 1
+
+[Events]
+
+[TimingPoints]
+0,1000,4,1,0,100,1,0
+4065.367089002009,399.99999999999983,4,1,0,100,1,0
+
+
+[HitObjects]
+256,192,500,2,0,L|257:193,1,139.99999999999997,1:0:0:0:
+256,192,3000,2,4,L|257:193,1,205.15139246028113,1:0:0:0:
+256,192,4865.3670890020085,8,0,5965.367089002008,1:0:0:0:
+256,192,7065.367089002008,8,4,8465.367089002008,1:0:0:0:
