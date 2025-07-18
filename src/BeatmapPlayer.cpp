@@ -2,11 +2,9 @@
 
 #include <cstdlib>
 
-#include "Config.h"
 #include "main.h"
 #include "raylib.h"
 #include "Ruleset.h"
-#include "Time.h"
 #include "Utils.h"
 
 
@@ -55,20 +53,20 @@ void BeatmapPlayer::Draw() {
     int y = 28;
     for (int i = 0; i < m_ruleset->m_rating_count; ++i) {
         DrawText(m_ruleset->m_ratings[i].name, 10, y, 20, PspColorToRaylib(m_ruleset->m_ratings[i].color));
-        DrawText(TextFormat("%d", m_judgements[i]), 90, y, 20, WHITE);
+        DrawText(TextFormat("%d", m_judgements[i]), 145, y, 20, WHITE);
         y += 20;
     }
 
     DrawText("Acc", 10, y, 20, PINK);
-    DrawText(TextFormat("%.2f%%", (float)m_current_rating / (float)m_max_rating * 100.f), 90, y, 20, WHITE);
+    DrawText(TextFormat("%.2f%%", (float)m_current_rating / (float)m_max_rating * 100.f), 145, y, 20, WHITE);
     y += 20;
 
     DrawText("Combo", 10, y, 20, YELLOW);
-    DrawText(TextFormat("%d", m_combo), 90, y, 20, WHITE);
+    DrawText(TextFormat("%d", m_combo), 145, y, 20, WHITE);
     y += 20;
 
     DrawText("Time", 10, y, 20, WHITE);
-    DrawText(TextFormat("%.2f (Over: %d)", m_time, m_ruleset->IsOver()), 90, y, 20, WHITE);
+    DrawText(TextFormat("%.2f (Over: %d)", m_time, m_ruleset->IsOver()), 145, y, 20, WHITE);
     y += 20;
 
     if (m_have_hit_difference) {

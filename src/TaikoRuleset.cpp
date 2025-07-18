@@ -12,7 +12,8 @@
 static RulesetRating s_taiko_ratings[] = {
     {"Great", 300, 300, false, true, false, 0xFFFF5050},
     {"Ok", 150, 300, false, true, false, 0xFF50FF50},
-    {"Miss", 0, 300, false, false, true, 0xFF0000FF}
+    {"Miss", 0, 300, false, false, true, 0xFF0000FF},
+    {"StrongBonus", 10, 10, true, false, false, 0xFFFFFFFF}
 };
 static const int s_taiko_rating_count = sizeof(s_taiko_ratings) / sizeof(RulesetRating);
 
@@ -27,8 +28,13 @@ static const int s_taiko_input_count = sizeof(s_taiko_inputs) / sizeof(RulesetIn
 #define TAIKO_GREAT 0
 #define TAIKO_OK 1
 #define TAIKO_MISS 2
+#define TAIKO_STRONG_BONUS 3
 
-TaikoRuleset::TaikoRuleset() : Ruleset(s_taiko_ratings, s_taiko_rating_count, s_taiko_inputs, s_taiko_input_count), m_first_hit_index(0), m_first_effect_point(0), m_audio{} {
+TaikoRuleset::TaikoRuleset()
+    : Ruleset(s_taiko_ratings, s_taiko_rating_count, s_taiko_inputs, s_taiko_input_count),
+      m_first_hit_index(0), m_first_effect_point(0),
+      m_audio{},
+      m_latest_strong_hit_key(TaikoUnused), m_latest_strong_hit_time(-100000) {
     ComputeHitWindows();
 }
 
@@ -64,6 +70,9 @@ bool TaikoRuleset::ShouldFail() {
 }
 
 void TaikoRuleset::HandleInput(const RulesetInputMessage &message) {
+    if (HandleStrongNote(message)) {
+        return;
+    }
     if (HandleHit(message)) {
         ++m_first_hit_index;
         return;
@@ -182,6 +191,33 @@ void TaikoRuleset::ComputeHitWindows() {
     m_miss_hitwindow = (accuracy <= 5.f) ? (int)(135.f - 8.f * accuracy) : (int)(120.f - 5.f * accuracy);
 }
 
+
+bool TaikoRuleset::HandleStrongNote(const RulesetInputMessage &message) {
+    if (m_latest_strong_hit_key == TaikoUnused) return false;
+
+    int time_difference = message.time - m_latest_strong_hit_time;
+
+    //We want to allow a bit of delay between the two presses for a strong hit, since pressing 2 keys EXACTLY at the same
+    //time is too hard
+    if (time_difference < -25 || time_difference > 25) return false;
+
+   bool strong_hit_handled = false;
+
+    //Check if the key that was pressed is the other one
+    if ((message.action == Side1 && m_latest_strong_hit_key == Side2) ||
+        (message.action == Side2 && m_latest_strong_hit_key == Side1) ||
+        (message.action == Middle1 && m_latest_strong_hit_key == Middle2) ||
+        (message.action == Middle2 && m_latest_strong_hit_key == Middle1)) {
+        GetPlayer()->ApplyRating(TAIKO_STRONG_BONUS);
+        strong_hit_handled = true;
+    }
+
+    m_latest_strong_hit_time = -100000;
+    m_latest_strong_hit_key = TaikoUnused;
+
+    return strong_hit_handled;
+}
+
 //Return false if input was handled by this
 bool TaikoRuleset::HandleHit(const RulesetInputMessage &message) {
     auto beatmap = GetBeatmap<TaikoBeatmap>();
@@ -206,6 +242,12 @@ bool TaikoRuleset::HandleHit(const RulesetInputMessage &message) {
             return true;
         }
 
+        //TODO: maybe this shouldn't be included if we are hitting in the miss time window
+        if ((hit->hit_type&TaikoHitType::Strong) != 0) {
+            m_latest_strong_hit_time = message.time; //Maybe put the note's time instead?
+            m_latest_strong_hit_key = (TaikoActions) message.action;
+        }
+
         player->SendHitDifference(hit_relative_time);
 
         if (hit_relative_time >= -m_great_hitwindow && hit_relative_time <= m_great_hitwindow) player->ApplyRating(TAIKO_GREAT);
@@ -219,6 +261,12 @@ bool TaikoRuleset::HandleHit(const RulesetInputMessage &message) {
         if ((hit->hit_type&TaikoHitType::Blue) == 0) {
             player->ApplyRating(TAIKO_MISS);
             return true;
+        }
+
+        //TODO: maybe this shouldn't be included if we are hitting in the miss time window
+        if ((hit->hit_type&TaikoHitType::Strong) != 0) {
+            m_latest_strong_hit_time = message.time; //Maybe put the note's time instead?
+            m_latest_strong_hit_key = (TaikoActions) message.action;
         }
 
         player->SendHitDifference(hit_relative_time);

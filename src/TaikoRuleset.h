@@ -8,6 +8,7 @@
 struct TaikoEffectPoint;
 
 enum TaikoActions {
+    TaikoUnused = 0,
     Middle1,
     Middle2,
     Side1,
@@ -41,6 +42,7 @@ private:
 
     void ComputeHitWindows();
 
+    bool HandleStrongNote(const RulesetInputMessage &message);
     bool HandleHit(const RulesetInputMessage &message);
 
     //This is the index of the first hit that should be drawn on screen.
@@ -55,6 +57,12 @@ private:
     int m_miss_hitwindow;
 
     Music m_audio;
+
+    //store the first key (action) that was used to press the last strong note
+    TaikoActions m_latest_strong_hit_key;
+
+    //store when the last strong hit was pressed
+    int m_latest_strong_hit_time;
 };
 
 
