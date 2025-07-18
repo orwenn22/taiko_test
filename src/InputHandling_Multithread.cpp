@@ -1,14 +1,19 @@
-#include "InputThread.h"
+#include "Config.h"
+#if !SINGLE_THREAD_INPUT
+
+#include "InputHandling.h"
 
 #include <mutex>
 #include <queue>
 #include <bits/this_thread_sleep.h>
 #include <raylib.h>
+#include <thread>
 
 #include "main.h"
 #include "Time.h"
 
-#if !SINGLE_THREAD_INPUT
+static std::thread s_input_thread;
+
 static int *s_keys = nullptr; //Store all the keys we should check
 static size_t s_count = 0; //Store the amount of keys in the array above
 static std::queue<InputEvent> s_input_queue; //This is how the input thread send stuff to the main thread
@@ -32,7 +37,7 @@ static void CheckSpecifiedKeys() {
     }
 }
 
-void InputThreadMain() {
+static void InputThreadMain() {
     while (g_running.load()) {
         s_input_thread_iterations.fetch_add(1, std::memory_order_relaxed);
         PollInputEvents();
@@ -58,20 +63,8 @@ void SendInputsToScan(int *keys, size_t count) {
     s_count = count;
 }
 
-void ClearInputThread() {
-    std::lock_guard<std::mutex> lock(s_keys_mutex);
-    if (s_keys != nullptr) free(s_keys);
-    s_keys = nullptr;
-    s_count = 0;
-}
 
-int GetInputThreadIterations() {
-    int iterations = s_input_thread_iterations.load();
-    s_input_thread_iterations.store(0);
-    return iterations;
-}
-
-void PollFromInputThread(std::queue<InputEvent> &input_queue) {
+void PollInputEvents(std::queue<InputEvent> &input_queue) {
     std::lock_guard<std::mutex> lock(s_keys_mutex);
     while (!s_input_queue.empty()) {
         input_queue.push(s_input_queue.front());
@@ -79,10 +72,25 @@ void PollFromInputThread(std::queue<InputEvent> &input_queue) {
     }
 }
 
-#else
 
 int GetInputThreadIterations() {
-    return 0;
+    int iterations = s_input_thread_iterations.load();
+    s_input_thread_iterations.store(0);
+    return iterations;
+}
+
+
+void InitInputHandling() {
+    s_input_thread = std::thread(InputThreadMain);
+}
+
+void CloseInputHandling() {
+    s_input_thread.join();
+
+    std::lock_guard<std::mutex> lock(s_keys_mutex);
+    if (s_keys != nullptr) free(s_keys);
+    s_keys = nullptr;
+    s_count = 0;
 }
 
 #endif

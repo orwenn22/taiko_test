@@ -6,7 +6,7 @@
 
 #include "BeatmapPlayer.h"
 #include "Config.h"
-#include "InputThread.h"
+#include "InputHandling.h"
 #include "raylib.h"
 #include "TaikoRuleset.h"
 #include "Time.h"
@@ -17,56 +17,51 @@ std::atomic<bool> g_running = true;
 
 
 int main() {
-    OsuBeatmap *beatmap = OsuBeatmap::load("res/enthousiastic.txt");
+    OsuBeatmap *beatmap = OsuBeatmap::load("res/lagtrain.txt");
     TaikoBeatmap *taiko_beatmap = TaikoBeatmap::FromOsuBeatmap(beatmap);
     delete beatmap;
     if (taiko_beatmap == nullptr) return 1;
 
-    SetGameStartTimeToNow();
+    SetLastFrameTimeToNow();
 
     InitWindow(960, 540, "taco test");
     InitAudioDevice();
     SetTargetFPS(60);
 
-#if !SINGLE_THREAD_INPUT
-    std::thread input_thread(InputThreadMain);
-#endif
+    InitInputHandling();
 
     BeatmapPlayer *player = new BeatmapPlayer(new TaikoRuleset, taiko_beatmap);
 
     while (!WindowShouldClose() && g_running.load()) {
-#if !SINGLE_THREAD_INPUT
+        //Get inputs
         std::queue<InputEvent> input_queue;
-        PollFromInputThread(input_queue);
+        PollInputEvents(input_queue);
+
         while (!input_queue.empty()) {
             player->HandleInput(input_queue.front());
             input_queue.pop();
         }
-#else
-        PollInputEvents();
-#endif
 
         player->Update(GetFrameTime());
 
-        SetLastFrameTimeToNow();
-
-        BeginDrawing(); //This calls it what makes this tread wait in order to reach the target framerate
+        BeginDrawing();
         ClearBackground(BLACK);
         player->Draw();
         DrawFPS(10, 10);
+
+#if !SINGLE_THREAD_INPUT
         int input_iterations = GetInputThreadIterations();
         if (input_iterations < 5) printf("Low input thread iteration count\n");
         DrawText(TextFormat("%d IPF", input_iterations), 90, 10, 20, GREEN);
-        EndDrawing();
+#endif
+
+        SetLastFrameTimeToNow();
+        EndDrawing(); //This calls it what makes this tread wait in order to reach the target framerate, therefore we should call SetLastFrameTimeToNow() right before (actually maybe it could be called at the end of PollInputEvents()? idk)
     }
 
     g_running = false;
 
-#if !SINGLE_THREAD_INPUT
-    input_thread.join();
-    ClearInputThread();
-#endif
-
+    CloseInputHandling();
     CloseAudioDevice();
     CloseWindow();
 

@@ -30,8 +30,9 @@ add_executable(taiko_test src/main.cpp
         src/Beatmap.h
         src/TaikoRuleset.cpp
         src/TaikoRuleset.h
-        src/InputThread.cpp
-        src/InputThread.h
+        src/InputHandling_Multithread.cpp
+        src/InputHandling_Singlethread.cpp
+        src/InputHandling.h
         src/main.h
         src/Config.h
         src/Time.cpp

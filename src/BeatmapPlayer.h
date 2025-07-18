@@ -1,6 +1,7 @@
 #ifndef BEATMAPPLAYER_H
 #define BEATMAPPLAYER_H
-#include "InputThread.h"
+
+#include "InputHandling.h"
 #include "TaikoRuleset.h"
 #include "TaikoBeatmap/TaikoBeatmap.h"
 
