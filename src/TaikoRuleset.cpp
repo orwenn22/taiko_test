@@ -197,7 +197,7 @@ bool TaikoRuleset::HandleHit(const RulesetInputMessage &message) {
     int hit_relative_time = hit->time - message.time;
 
     //Check if we can reach it
-    if (hit_relative_time < m_miss_hitwindow || hit_relative_time > m_miss_hitwindow) return false;
+    if (hit_relative_time < -m_miss_hitwindow || hit_relative_time > m_miss_hitwindow) return false;
 
     if (message.action == Middle1 || message.action == Middle2) {
         //Wrong color (hit is blue, should be red)
