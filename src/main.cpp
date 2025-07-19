@@ -17,7 +17,7 @@ std::atomic<bool> g_running = true;
 
 
 int main() {
-    OsuBeatmap *beatmap = OsuBeatmap::load("res/lagtrain.txt");
+    OsuBeatmap *beatmap = OsuBeatmap::load("res/sara_hito.txt");
     TaikoBeatmap *taiko_beatmap = TaikoBeatmap::FromOsuBeatmap(beatmap);
     delete beatmap;
     if (taiko_beatmap == nullptr) return 1;

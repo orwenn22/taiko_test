@@ -47,11 +47,13 @@ struct OsuSliderHitObjectParams : OsuHitObjectParams {
     OsuSliderHitObjectParams();
     ~OsuSliderHitObjectParams() override;
 
-
     // Notice: The slider's length can be used to determine the time it takes to complete the slider.
     // length / (SliderMultiplier * 100 * SV) * beatLength tells how many milliseconds it takes to complete one slide
     // of the slider (where SV is the slider velocity multiplier given by the effective inherited timing point, or 1
     // if there is none).
+    inline float getDuration(float slider_multiplier, float slider_velocity, float beat_length) {
+        return length / (slider_multiplier * 100 * slider_velocity) * beat_length;
+    }
 };
 
 //https://osu.ppy.sh/wiki/en/Client/File_formats/osu_%28file_format%29#spinners

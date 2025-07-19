@@ -38,6 +38,10 @@ private:
     //current time correspond the the current position/progress of the map
     float TimeToPosition(int time, int current_time);
 
+    //Same as above, but allow to specify a different time for which effect point should be used
+    //(meant for drum roll tail that always moves at the same speed as the head)
+    float TimeToPosition(int time, int current_time, int effect_time);
+
     TaikoEffectPoint *GetEffectPointForTime(int time);
 
     void ComputeHitWindows();

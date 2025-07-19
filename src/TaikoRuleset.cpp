@@ -142,7 +142,7 @@ void TaikoRuleset::Draw() {
         }
         //out_count = 0;
 
-        DrawCircle((int)(192 + position*960), 540/2, 35.f + 25.f*((hit->hit_type&TaikoHitType::Strong) != 0), hit->hit_type&TaikoHitType::Blue ? BLUE : RED);
+        DrawCircle((int)(192 + position*960), 540/2, 35.f + 25.f*hit->IsStrong(), hit->IsBlue() ? BLUE : RED);
     }
 }
 
@@ -151,12 +151,17 @@ void TaikoRuleset::Draw() {
 ///PRIVATE
 
 float TaikoRuleset::TimeToPosition(int time, int current_time) {
+    return TimeToPosition(time, current_time, time);
+}
+
+float TaikoRuleset::TimeToPosition(int time, int current_time, int effect_time) {
     float normalized_time = (float)(time-current_time) / 1900.f; //1900 found by comparing side to side with lazer
 
-    TaikoEffectPoint *effect_point = GetEffectPointForTime(time);
+    TaikoEffectPoint *effect_point = GetEffectPointForTime(effect_time);
 
     return normalized_time * GetBeatmap<TaikoBeatmap>()->m_base_velocity * effect_point->scroll_multiplier;
 }
+
 
 TaikoEffectPoint *TaikoRuleset::GetEffectPointForTime(int time) {
     TaikoEffectPoint *effect_points = GetBeatmap<TaikoBeatmap>()->m_effect_points;
@@ -237,14 +242,14 @@ bool TaikoRuleset::HandleHit(const RulesetInputMessage &message) {
 
     if (message.action == Middle1 || message.action == Middle2) {
         //Wrong color (hit is blue, should be red)
-        if ((hit->hit_type&TaikoHitType::Blue) != 0) {
+        if (hit->IsBlue()) {
             player->ApplyRating(TAIKO_MISS);
             return true;
         }
 
         //TODO: maybe this shouldn't be included if we are hitting in the miss time window
-        if ((hit->hit_type&TaikoHitType::Strong) != 0) {
-            m_latest_strong_hit_time = message.time; //Maybe put the note's time instead?
+        if (hit->IsStrong()) {
+            m_latest_strong_hit_time = message.time;
             m_latest_strong_hit_key = (TaikoActions) message.action;
         }
 
@@ -258,14 +263,14 @@ bool TaikoRuleset::HandleHit(const RulesetInputMessage &message) {
 
     if (message.action == Side1 || message.action == Side2) {
         //Wrong color (hit is red, should be blue)
-        if ((hit->hit_type&TaikoHitType::Blue) == 0) {
+        if (!hit->IsBlue()) {
             player->ApplyRating(TAIKO_MISS);
             return true;
         }
 
         //TODO: maybe this shouldn't be included if we are hitting in the miss time window
-        if ((hit->hit_type&TaikoHitType::Strong) != 0) {
-            m_latest_strong_hit_time = message.time; //Maybe put the note's time instead?
+        if (hit->IsStrong()) {
+            m_latest_strong_hit_time = message.time;
             m_latest_strong_hit_key = (TaikoActions) message.action;
         }
 

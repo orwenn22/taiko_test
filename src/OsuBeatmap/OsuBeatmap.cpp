@@ -173,11 +173,13 @@ static void HandleHitObjectLine(OsuBeatmap *beatmap, char *line) {
 
         //parse curve stuff
         slider_params->curve_type = line[current_index];
-        ++current_index; //skip first pipe
+        ++current_index; //skip curve type
         size_t curve_point_count = CountCharUntil(line, '|', current_index, ',');
-        slider_params->curve_points = (CurvePoint *) malloc(sizeof(CurvePoint) * curve_point_count);
-        slider_params->curve_point_count = curve_point_count;
-        ++current_index; //skip first pipe
+        if (curve_point_count != 0) {
+            slider_params->curve_points = (CurvePoint *) malloc(sizeof(CurvePoint) * curve_point_count);
+            slider_params->curve_point_count = curve_point_count;
+        }
+        ++current_index; //skip first pipe (or comma if there are no curvePoints)
         //printf("%c|", slider_params->curve_type);
 
         //parse curvePoints
@@ -195,6 +197,7 @@ static void HandleHitObjectLine(OsuBeatmap *beatmap, char *line) {
         slider_params->slides = ParseInt(line, &current_index);
         ++current_index; //skip comma
         slider_params->length = ParseFloat(line, &current_index);
+        if (slider_params->length < 0) slider_params->length = 0; //info about negative slider length in taiko here https://www.reddit.com/r/osugame/comments/1jf8obl/bad_apple_but_it_uses_taiko_sliders_only_made_by/ (let's just set it to 0 and see if it works for now)
         ++current_index; //skip comma
         //printf("%d,%f,", slider_params->slides, slider_params->length); //slide,length,
 

@@ -15,6 +15,9 @@ struct TaikoHit {
     TaikoHit(int time, bool blue, bool strong);
     TaikoHit(int time, unsigned char osu_hitsounds);
     ~TaikoHit();
+
+    inline bool IsStrong() { return (hit_type & Strong) != 0; }
+    inline bool IsBlue() { return (hit_type & Blue) != 0; }
 };
 
 

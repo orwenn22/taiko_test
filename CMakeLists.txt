@@ -36,6 +36,10 @@ add_executable(taiko_test src/main.cpp
         src/main.h
         src/Config.h
         src/Time.cpp
-        src/Time.h)
+        src/Time.h
+        src/TaikoBeatmap/TaikoTimingPoint.cpp
+        src/TaikoBeatmap/TaikoTimingPoint.h
+        src/TaikoBeatmap/TaikoDrumRoll.cpp
+        src/TaikoBeatmap/TaikoDrumRoll.h)
 
 target_link_libraries(taiko_test PRIVATE raylib)
