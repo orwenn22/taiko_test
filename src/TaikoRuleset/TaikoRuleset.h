@@ -1,9 +1,7 @@
 #ifndef TAIKORULESET_H
 #define TAIKORULESET_H
 
-#include "raylib.h"
-#include "Ruleset.h"
-
+#include "../Ruleset.h"
 
 struct TaikoEffectPoint;
 
@@ -17,20 +15,20 @@ enum TaikoActions {
 
 class TaikoRuleset : public Ruleset {
 public:
-    TaikoRuleset();
+    TaikoRuleset(RulesetInput *inputs, int input_count);
     ~TaikoRuleset() override;
 
-    void OnBeatmapLoaded() override;
+    void LoadResources() override;
     void OnGameStart() override;
     bool IsOver() override;
     void OnGameEnd() override;
     bool ShouldFail() override;
     void HandleInput(const RulesetInputMessage &message) override;
     void Update(float dt) override;
-    void Draw() override;
+    //void Draw() override;
 
 
-private:
+protected:
 
     //1 = completely outside the playfield
     //0 = perfectly alligned with the target
@@ -53,14 +51,15 @@ private:
     //Every hit with a strictly lower index already have been judged and should not be visible.
     int m_first_hit_index;
 
-    //Same as above, but for barlines
+    //Same as above, but for drum roll
+    int m_first_drum_roll;
+
+    //Same as above, but for effect point barlines
     int m_first_effect_point;
 
     int m_great_hitwindow;
     int m_ok_hitwindow;
     int m_miss_hitwindow;
-
-    Music m_audio;
 
     //store the first key (action) that was used to press the last strong note
     TaikoActions m_latest_strong_hit_key;

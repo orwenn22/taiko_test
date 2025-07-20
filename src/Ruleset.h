@@ -54,7 +54,7 @@ public:
     virtual ~Ruleset();
 
     //Called when after the beatmap is loaded
-    virtual void OnBeatmapLoaded();
+    virtual void LoadResources();
 
     //Called when the game is starting
     virtual void OnGameStart();

@@ -8,10 +8,11 @@
 #include "Config.h"
 #include "InputHandling.h"
 #include "raylib.h"
-#include "TaikoRuleset.h"
+#include "TaikoRuleset/TaikoRuleset.h"
 #include "Time.h"
 #include "OsuBeatmap/OsuBeatmap.h"
 #include "TaikoBeatmap/TaikoBeatmap.h"
+#include "TaikoRuleset/TaikoRulesetRaylib.h"
 
 std::atomic<bool> g_running = true;
 
@@ -24,13 +25,14 @@ int main() {
 
     SetLastFrameTimeToNow();
 
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(960, 540, "taco test");
     InitAudioDevice();
     SetTargetFPS(60);
 
     InitInputHandling();
 
-    BeatmapPlayer *player = new BeatmapPlayer(new TaikoRuleset, taiko_beatmap);
+    BeatmapPlayer *player = new BeatmapPlayer(new TaikoRulesetRaylib, taiko_beatmap);
 
     while (!WindowShouldClose() && g_running.load()) {
         //Get inputs
@@ -59,6 +61,7 @@ int main() {
         EndDrawing(); //This calls it what makes this tread wait in order to reach the target framerate, therefore we should call SetLastFrameTimeToNow() right before (actually maybe it could be called at the end of PollInputEvents()? idk)
     }
 
+    delete player;
     g_running = false;
 
     CloseInputHandling();

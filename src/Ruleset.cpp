@@ -13,7 +13,7 @@ Ruleset::Ruleset(RulesetRating *ratings, int rating_count, RulesetInput *inputs,
 
 Ruleset::~Ruleset() = default;
 
-void Ruleset::OnBeatmapLoaded() { /* nothing */ }
+void Ruleset::LoadResources() { /* nothing */ }
 void Ruleset::OnGameStart() { /* nothing */ }
 bool Ruleset::IsOver() { return true; }
 void Ruleset::OnGameEnd() { /* noting */ }

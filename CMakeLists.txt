@@ -28,8 +28,8 @@ add_executable(taiko_test src/main.cpp
         src/Ruleset.h
         src/Beatmap.cpp
         src/Beatmap.h
-        src/TaikoRuleset.cpp
-        src/TaikoRuleset.h
+        src/TaikoRuleset/TaikoRuleset.cpp
+        src/TaikoRuleset/TaikoRuleset.h
         src/InputHandling_Multithread.cpp
         src/InputHandling_Singlethread.cpp
         src/InputHandling.h
@@ -40,6 +40,8 @@ add_executable(taiko_test src/main.cpp
         src/TaikoBeatmap/TaikoTimingPoint.cpp
         src/TaikoBeatmap/TaikoTimingPoint.h
         src/TaikoBeatmap/TaikoDrumRoll.cpp
-        src/TaikoBeatmap/TaikoDrumRoll.h)
+        src/TaikoBeatmap/TaikoDrumRoll.h
+        src/TaikoRuleset/TaikoRulesetRaylib.cpp
+        src/TaikoRuleset/TaikoRulesetRaylib.h)
 
 target_link_libraries(taiko_test PRIVATE raylib)

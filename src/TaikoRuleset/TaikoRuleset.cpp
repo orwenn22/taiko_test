@@ -2,12 +2,12 @@
 
 #include <cstdio>
 
-#include "BeatmapPlayer.h"
-#include "TaikoBeatmap/TaikoBeatmap.h"
+#include "../BeatmapPlayer.h"
+#include "../TaikoBeatmap/TaikoBeatmap.h"
 
-#include "raylib.h"
-#include "TaikoBeatmap/TaikoEffectPoint.h"
-#include "TaikoBeatmap/TaikoHit.h"
+#include "../TaikoBeatmap/TaikoDrumRoll.h"
+#include "../TaikoBeatmap/TaikoEffectPoint.h"
+#include "../TaikoBeatmap/TaikoHit.h"
 
 static RulesetRating s_taiko_ratings[] = {
     {"Great", 300, 300, false, true, false, 0xFFFF5050},
@@ -17,51 +17,40 @@ static RulesetRating s_taiko_ratings[] = {
 };
 static const int s_taiko_rating_count = sizeof(s_taiko_ratings) / sizeof(RulesetRating);
 
-static RulesetInput s_taiko_inputs[] = {
-    {KEY_D, Side1},
-    {KEY_F, Middle1},
-    {KEY_J, Middle2},
-    {KEY_K, Side2}
-};
-static const int s_taiko_input_count = sizeof(s_taiko_inputs) / sizeof(RulesetInput);
-
 #define TAIKO_GREAT 0
 #define TAIKO_OK 1
 #define TAIKO_MISS 2
 #define TAIKO_STRONG_BONUS 3
 
-TaikoRuleset::TaikoRuleset()
-    : Ruleset(s_taiko_ratings, s_taiko_rating_count, s_taiko_inputs, s_taiko_input_count),
-      m_first_hit_index(0), m_first_effect_point(0),
-      m_audio{},
+TaikoRuleset::TaikoRuleset(RulesetInput *inputs, int input_count)
+    : Ruleset(s_taiko_ratings, s_taiko_rating_count, inputs, input_count),
+      m_first_hit_index(0), m_first_drum_roll(0), m_first_effect_point(0),
       m_latest_strong_hit_key(TaikoUnused), m_latest_strong_hit_time(-100000) {
     ComputeHitWindows();
 }
 
 TaikoRuleset::~TaikoRuleset() {
+
 }
 
-void TaikoRuleset::OnBeatmapLoaded() {
-    Ruleset::OnBeatmapLoaded();
+void TaikoRuleset::LoadResources() {
+    Ruleset::LoadResources();
     ComputeHitWindows();
-    GetPlayer()->m_health = 0.f; //Taiko health start at 0
-    m_audio = LoadMusicStream(TextFormat("res/%s", GetBeatmap<TaikoBeatmap>()->m_audio_filename));
 }
 
 void TaikoRuleset::OnGameStart() {
     Ruleset::OnGameStart();
-    PlayMusicStream(m_audio);
+    GetPlayer()->m_health = 0.f; //Taiko health start at 0
 }
 
 bool TaikoRuleset::IsOver() {
     TaikoBeatmap *beatmap = GetBeatmap<TaikoBeatmap>();
     if (beatmap == nullptr) return true;
-    return (m_first_hit_index >= beatmap->m_hit_count);
+    return (m_first_hit_index >= beatmap->m_hit_count && m_first_drum_roll >= beatmap->m_drum_roll_count);
 }
 
 void TaikoRuleset::OnGameEnd() {
     Ruleset::OnGameEnd();
-    StopMusicStream(m_audio);
 }
 
 bool TaikoRuleset::ShouldFail() {
@@ -80,69 +69,25 @@ void TaikoRuleset::HandleInput(const RulesetInputMessage &message) {
 }
 
 void TaikoRuleset::Update(float dt) {
-    UpdateMusicStream(m_audio);
-
     auto beatmap = GetBeatmap<TaikoBeatmap>();
     BeatmapPlayer *player = GetPlayer();
 
     //current time in ms
     int current_time = (int)(GetPlayer()->GetTime() * 1000.f);
 
-    //if a hit is outside the timing window we need to get rid of it
+    //if a hit is outside the timing window (too late) we need to get rid of it
     while (m_first_hit_index < beatmap->m_hit_count && beatmap->m_hits[m_first_hit_index].time <= current_time - m_miss_hitwindow) {
         ++m_first_hit_index;
         player->ApplyRating(TAIKO_MISS);
     }
 
+    //We also want to get rid of drum rolls once they are fully over
+    while (m_first_drum_roll < beatmap->m_drum_roll_count && beatmap->m_drum_rolls[m_first_drum_roll].GetEndTime() <= current_time) {
+        ++m_first_drum_roll;
+    }
+
     while (m_first_effect_point < beatmap->m_effect_point_count && beatmap->m_effect_points[m_first_effect_point].time <= current_time - m_miss_hitwindow) {
         ++m_first_effect_point;
-    }
-}
-
-void TaikoRuleset::Draw() {
-    auto beatmap = GetBeatmap<TaikoBeatmap>();
-
-    //current time in ms
-    int current_time = (int)(GetPlayer()->GetTime() * 1000.f);
-
-    DrawRectangle(0, 540/2 - 128/2, 960, 128, WHITE);
-    DrawRectangle(0, 540/2 - 128/2 + 1, 960, 128-2, BLACK);
-    DrawCircle(192, 540/2, 37, WHITE);
-    DrawCircle(192, 540/2, 35, GRAY);
-
-    //Draw barlines
-    int barline_out_count = 0;
-    //printf("%i\n", m_first_effect_point);
-    for (int i = m_first_effect_point; i < beatmap->m_effect_point_count; ++i) {
-        TaikoEffectPoint *effect_point = &(beatmap->m_effect_points[i]);
-        float position = TimeToPosition(effect_point->time, current_time);
-
-        if (position >= 1) {
-            ++barline_out_count;
-            if (barline_out_count >= 15) break;
-            continue;
-        }
-        barline_out_count = 0;
-
-        DrawLine(192 + position*960, 540/2-64, 192 + position*960, 540/2+64, GRAY);
-    }
-
-    //Draw hits
-    int out_count = 0;
-    for (int i = m_first_hit_index; i < beatmap->m_hit_count; ++i) {
-        TaikoHit *hit = &(beatmap->m_hits[i]);
-        float position = TimeToPosition(hit->time, current_time);
-
-        //We want to stop drawing hits that are outside the view at some point.
-        //Idk how to do this correctly, so let's just stop whenever we have 15 consecutive hits outside.
-        if (position >= 1) {
-            //++out_count;
-            //if (out_count >= 15) break;
-            continue;
-        }
-        //out_count = 0;
-
-        DrawCircle((int)(192 + position*960), 540/2, 35.f + 25.f*hit->IsStrong(), hit->IsBlue() ? BLUE : RED);
     }
 }
 
@@ -155,14 +100,24 @@ float TaikoRuleset::TimeToPosition(int time, int current_time) {
 }
 
 float TaikoRuleset::TimeToPosition(int time, int current_time, int effect_time) {
-    float normalized_time = (float)(time-current_time) / 1900.f; //1900 found by comparing side to side with lazer
+    float normalized_position_no_effects = (float)(time-current_time) / 1900.f; //1900 found by comparing side to side with lazer
 
     TaikoEffectPoint *effect_point = GetEffectPointForTime(effect_time);
 
-    return normalized_time * GetBeatmap<TaikoBeatmap>()->m_base_velocity * effect_point->scroll_multiplier;
+    float normalized_position = normalized_position_no_effects * GetBeatmap<TaikoBeatmap>()->m_base_velocity * effect_point->scroll_multiplier;
+
+    //Here we could apply additional scroll effects
+    //if (normalized_position >= 1) return normalized_position; //don't apply effects on notes that are outside the screen
+    //normalized_position = normalized_position*normalized_position;
+    //normalized_position = powf(normalized_position*2-1, 3)/2 + 0.5;
+    //normalized_position = -6 * powf(normalized_position-0.40825f, 2) + 1;
+
+    return normalized_position;
 }
 
 
+//TODO: eventually fully get rid of this, optimize the one from TaikoBeatmap and relly on that one instead.
+//      this is here only because it's somewhat more efficient in the context of gameplay.
 TaikoEffectPoint *TaikoRuleset::GetEffectPointForTime(int time) {
     TaikoEffectPoint *effect_points = GetBeatmap<TaikoBeatmap>()->m_effect_points;
     int effect_point_count = GetBeatmap<TaikoBeatmap>()->m_effect_point_count;

@@ -2,8 +2,7 @@
 #define BEATMAPPLAYER_H
 
 #include "InputHandling.h"
-#include "TaikoRuleset.h"
-#include "TaikoBeatmap/TaikoBeatmap.h"
+#include "Ruleset.h"
 
 
 class Beatmap;

@@ -58,7 +58,21 @@ TaikoBeatmap *TaikoBeatmap::FromOsuBeatmap(OsuBeatmap *osu_beatmap) {
         }
     }
 
-    //TODO : drum roll and the other weird thing
+    //Add default effect point if there is none
+    if (taiko_beatmap->m_effect_point_count == 0) {
+        taiko_beatmap->m_effect_points = (TaikoEffectPoint *) malloc(sizeof(TaikoEffectPoint));
+        taiko_beatmap->m_effect_points[0] = TaikoEffectPoint(0, 1.f);
+        taiko_beatmap->m_effect_point_count = 1;
+    }
+
+    //Add default timing point if there is none
+    if (taiko_beatmap->m_timing_point_count == 0) {
+        taiko_beatmap->m_timing_points = (TaikoTimingPoint *) malloc(sizeof(TaikoTimingPoint));
+        taiko_beatmap->m_timing_points[0] = TaikoTimingPoint(0, 1000.f);
+        taiko_beatmap->m_timing_point_count = 1;
+    }
+
+    //TODO : handle other weird thing
 
     //Allocate space for hits
     taiko_beatmap->m_hit_count = osu_beatmap->CountObjectsOfType(OsuHitObjectType::HitCircle);
@@ -105,7 +119,7 @@ TaikoBeatmap *TaikoBeatmap::FromOsuBeatmap(OsuBeatmap *osu_beatmap) {
             int drum_roll_duration = (int) slider_params->getDuration(taiko_beatmap->m_base_velocity, effect_point->scroll_multiplier, timing_point->beat_length);
 
             //Convert to taiko drum roll
-            taiko_beatmap->m_drum_rolls[converted_drum_rolls] = TaikoDrumRoll(hit_object->time, drum_roll_duration, timing_point->beat_length);
+            taiko_beatmap->m_drum_rolls[converted_drum_rolls] = TaikoDrumRoll(hit_object->time, drum_roll_duration, timing_point->beat_length, hit_object->hitsound&Finish != 0);
 
             printf("Duration of drum roll %zu (at %i ms): %i ms\n    slider length: %f\n    base velocity: %f\n    scroll mult: %f\n    beat length: %f\n", converted_drum_rolls, hit_object->time, drum_roll_duration, slider_params->length,taiko_beatmap->m_base_velocity, effect_point->scroll_multiplier, timing_point->beat_length);
             printf("    ticks: %i\n", taiko_beatmap->m_drum_rolls[converted_drum_rolls].tick_count);

@@ -19,7 +19,7 @@ BeatmapPlayer::BeatmapPlayer(Ruleset *ruleset, Beatmap *beatmap) : m_ruleset(rul
     m_judgements = (int *) malloc(sizeof(int) * m_ruleset->m_rating_count);
     for (int i = 0; i < m_ruleset->m_rating_count; ++i) m_judgements[i] = 0;
 
-    m_ruleset->OnBeatmapLoaded();
+    m_ruleset->LoadResources();
     m_ruleset->OnGameStart();
 }
 

@@ -7,13 +7,16 @@ struct TaikoDrumRoll {
     int time; //in ms
     int duration; //in ms
     int beat_length; //in ms
+    bool strong;
 
     int tick_count; //amount of ticks in the drum roll (doesn't include the tick on the head of the drum droll)
 
-    //TODO: a drum roll can be strong
 
-    TaikoDrumRoll(int time, int duration, int beat_length);
+    TaikoDrumRoll(int time, int duration, int beat_length, bool strong);
     ~TaikoDrumRoll();
+
+    //Get the end time of the drum roll relative to the start of the beatmap
+    inline int GetEndTime() { return time + duration; }
 };
 
 
