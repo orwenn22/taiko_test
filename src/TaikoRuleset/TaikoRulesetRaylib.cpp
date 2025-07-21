@@ -65,13 +65,15 @@ void TaikoRulesetRaylib::LoadResources() {
 
 void TaikoRulesetRaylib::OnGameStart() {
     TaikoRuleset::OnGameStart();
-    SeekMusicStream(m_audio, 0.f);
-    PlayMusicStream(m_audio);
+    if (m_audio.ctxData != nullptr) {
+        SeekMusicStream(m_audio, 0.f);
+        PlayMusicStream(m_audio);
+    }
 }
 
 void TaikoRulesetRaylib::OnGameEnd() {
     TaikoRuleset::OnGameEnd();
-    StopMusicStream(m_audio);
+    if (m_audio.ctxData != nullptr) StopMusicStream(m_audio);
 }
 
 void TaikoRulesetRaylib::HandleInput(const RulesetInputMessage &message) {
