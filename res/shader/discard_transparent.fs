@@ -18,7 +18,8 @@ void main()
     vec4 texelColor = texture(texture0, fragTexCoord);
 
     // This makes it so transparent pixels don't get written and therefore won't change values in the depth buffer
-    if (texelColor.a <= 0.01) discard;
+    // It looks kinda bad but that's the best solution i thought of for now
+    if (texelColor.a <= 0.3) discard;
 
     finalColor = texelColor*colDiffuse*fragColor;
 }

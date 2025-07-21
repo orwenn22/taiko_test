@@ -2,6 +2,7 @@
 
 #include <cstdlib>
 
+#include "Beatmap.h"
 #include "main.h"
 #include "raylib.h"
 #include "Ruleset.h"
@@ -25,6 +26,8 @@ BeatmapPlayer::BeatmapPlayer(Ruleset *ruleset, Beatmap *beatmap) : m_ruleset(rul
 
 BeatmapPlayer::~BeatmapPlayer() {
     free(m_judgements);
+    delete m_beatmap;
+    delete m_ruleset;
 }
 
 

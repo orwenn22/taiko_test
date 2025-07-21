@@ -119,10 +119,11 @@ TaikoBeatmap *TaikoBeatmap::FromOsuBeatmap(OsuBeatmap *osu_beatmap) {
             int drum_roll_duration = (int) slider_params->getDuration(taiko_beatmap->m_base_velocity, effect_point->scroll_multiplier, timing_point->beat_length);
 
             //Convert to taiko drum roll
-            taiko_beatmap->m_drum_rolls[converted_drum_rolls] = TaikoDrumRoll(hit_object->time, drum_roll_duration, timing_point->beat_length, hit_object->hitsound&Finish != 0);
+            taiko_beatmap->m_drum_rolls[converted_drum_rolls] = TaikoDrumRoll(hit_object->time, drum_roll_duration, timing_point->beat_length, (hit_object->hitsound&Finish) != 0);
 
             printf("Duration of drum roll %zu (at %i ms): %i ms\n    slider length: %f\n    base velocity: %f\n    scroll mult: %f\n    beat length: %f\n", converted_drum_rolls, hit_object->time, drum_roll_duration, slider_params->length,taiko_beatmap->m_base_velocity, effect_point->scroll_multiplier, timing_point->beat_length);
             printf("    ticks: %i\n", taiko_beatmap->m_drum_rolls[converted_drum_rolls].tick_count);
+            printf("    strong: %i\n", taiko_beatmap->m_drum_rolls[converted_drum_rolls].strong);
             ++converted_drum_rolls;
         }
     }
@@ -175,9 +176,6 @@ TaikoBeatmap::~TaikoBeatmap() {
     }
 }
 
-
-///////////////////////////
-///PRIVATE
 
 TaikoTimingPoint *TaikoBeatmap::GetTimingPointForTime(int time) {
     if (m_timing_point_count == 0) return nullptr;

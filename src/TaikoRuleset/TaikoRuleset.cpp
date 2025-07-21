@@ -8,6 +8,7 @@
 #include "../TaikoBeatmap/TaikoDrumRoll.h"
 #include "../TaikoBeatmap/TaikoEffectPoint.h"
 #include "../TaikoBeatmap/TaikoHit.h"
+#include "../TaikoBeatmap/TaikoTimingPoint.h"
 
 static RulesetRating s_taiko_ratings[] = {
     {"Great", 300, 300, false, true, false, 0xFFFF5050},
@@ -100,11 +101,14 @@ float TaikoRuleset::TimeToPosition(int time, int current_time) {
 }
 
 float TaikoRuleset::TimeToPosition(int time, int current_time, int effect_time) {
-    float normalized_position_no_effects = (float)(time-current_time) / 1900.f; //1900 found by comparing side to side with lazer
+    float normalized_position_no_effects = (float)(time-current_time) / 3000.f; //3000 found by comparing side to side with lazer
 
     TaikoEffectPoint *effect_point = GetEffectPointForTime(effect_time);
 
-    float normalized_position = normalized_position_no_effects * GetBeatmap<TaikoBeatmap>()->m_base_velocity * effect_point->scroll_multiplier;
+    //Ok, so i had no idea BPM affects scrolling, shoutout to this guy https://osu.ppy.sh/community/forums/topics/1851087?n=1
+    TaikoTimingPoint *timing_point = GetBeatmap<TaikoBeatmap>()->GetTimingPointForTime(effect_time);
+
+    float normalized_position = normalized_position_no_effects * GetBeatmap<TaikoBeatmap>()->m_base_velocity * effect_point->scroll_multiplier * (timing_point->GetBPM()/60);
 
     //Here we could apply additional scroll effects
     //if (normalized_position >= 1) return normalized_position; //don't apply effects on notes that are outside the screen

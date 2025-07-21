@@ -16,6 +16,9 @@ public:
     static TaikoBeatmap *FromOsuBeatmap(OsuBeatmap *osu_beatmap);
     ~TaikoBeatmap();
 
+    TaikoTimingPoint *GetTimingPointForTime(int time);
+    TaikoEffectPoint *GetEffectPointForTime(int time);
+
     TaikoHit *m_hits;
     size_t m_hit_count;
 
@@ -34,9 +37,6 @@ public:
 
 private:
     TaikoBeatmap();
-
-    TaikoTimingPoint *GetTimingPointForTime(int time);
-    TaikoEffectPoint *GetEffectPointForTime(int time);
 };
 
 #endif //TAIKOBEATMAP_H

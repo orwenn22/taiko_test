@@ -22,9 +22,13 @@ TaikoRulesetRaylib::TaikoRulesetRaylib()
     : TaikoRuleset(s_taiko_inputs_raylib, s_taiko_input_count),
       m_camera{},
       m_audio{}, m_small_hit_texture{}, m_small_hit_overlay_texture{}, m_drum_roll_tail_texture{}, m_drum_roll_middle_texture{},
+      m_receptor_texture{}, m_playfield_left_texture{}, m_playfield_left_keys_textures{},
       m_shader{},
-      m_playfield_width(970.f), m_object_travel_distance(m_playfield_width-128) {
-
+      m_playfield_width(970.f), m_playfield_height(128.f), m_object_travel_distance(m_playfield_width-128),
+      //All of these below are calculated by UpdatePlayfieldGeometry()
+      m_playfield_origin_y(540.f/2.f), m_playfield_center_y(0.f), m_receptor_center_x(0.f),
+      m_keys_opacity{0.f, 0.f, 0.f, 0.f} {
+    UpdatePlayfieldGeometry();
 }
 
 TaikoRulesetRaylib::~TaikoRulesetRaylib() {
@@ -33,6 +37,8 @@ TaikoRulesetRaylib::~TaikoRulesetRaylib() {
     UnloadTexture(m_receptor_texture);
     UnloadTexture(m_drum_roll_tail_texture);
     UnloadTexture(m_drum_roll_middle_texture);
+    UnloadTexture(m_playfield_left_texture);
+    for (int i = 0; i < 4; ++i) UnloadTexture(m_playfield_left_keys_textures[i]);
     UnloadShader(m_shader);
     UnloadMusicStream(m_audio);
 }
@@ -48,17 +54,33 @@ void TaikoRulesetRaylib::LoadResources() {
     m_drum_roll_middle_texture = LoadTexture("res/skin/Taiko/taikodrumrollmiddle.png");
     m_receptor_texture = LoadTexture("res/skin/Taiko/receptor.png");
 
+    m_playfield_left_texture = LoadTexture("res/skin/Taiko/taikoplayfieldleft.png");
+    m_playfield_left_keys_textures[0] = LoadTexture("res/skin/Taiko/taikomiddle1.png");
+    m_playfield_left_keys_textures[1] = LoadTexture("res/skin/Taiko/taikomiddle2.png");
+    m_playfield_left_keys_textures[2] = LoadTexture("res/skin/Taiko/taikoside1.png");
+    m_playfield_left_keys_textures[3] = LoadTexture("res/skin/Taiko/taikoside2.png");
+
     m_shader = LoadShader("res/shader/discard_transparent.vs", "res/shader/discard_transparent.fs");
 }
 
 void TaikoRulesetRaylib::OnGameStart() {
     TaikoRuleset::OnGameStart();
+    SeekMusicStream(m_audio, 0.f);
     PlayMusicStream(m_audio);
 }
 
 void TaikoRulesetRaylib::OnGameEnd() {
     TaikoRuleset::OnGameEnd();
     StopMusicStream(m_audio);
+}
+
+void TaikoRulesetRaylib::HandleInput(const RulesetInputMessage &message) {
+    TaikoRuleset::HandleInput(message);
+
+    //Display the key that has just been pressed
+    if (message.action >= Middle1 && message.action <= Side2) {
+        m_keys_opacity[message.action-Middle1] = 1.f;
+    }
 }
 
 
@@ -77,15 +99,19 @@ void TaikoRulesetRaylib::Update(float dt) {
         .projection = CAMERA_ORTHOGRAPHIC
     };
 
-    m_playfield_width = screen_width;
-    m_object_travel_distance = m_playfield_width-128;
+    SetPlayfieldY(screen_height/2.f-m_playfield_height/2.f);
+    SetPlayfieldWidth(screen_width);
+
+    for (int i = 0; i < 4; ++i) {
+        m_keys_opacity[i] -= dt*5.f;
+    }
 }
 
 //FIXME: THIS IS SCUFFED AF
 //Ok, so, for a while i was wondering how to display the objects in the correct order.
 //The approach i took was actually rendering a 3D scene with an orthographic projection, and then draw billboards for
 //each elements at the correct z coordinate.
-//However, that also meant that we would draw objects below objects that were proviously drawn, and the depth buffer
+//However, that also meant that we would draw objects below objects that were previously drawn, and the depth buffer
 //will get written even at the locations where the texture is transparent.
 //To fix this i made a fragment shader that will ignore pixels that are too transparent.
 //All of this probably isn't ideal, but ITS WORKING SOMEHOW
@@ -96,9 +122,12 @@ void TaikoRulesetRaylib::Draw() {
     int current_time = (int)(GetPlayer()->GetTime() * 1000.f);
 
     //TODO: draw playfield in 3D mode?
-    DrawRectangle(0, 540/2 - 128/2, (int) m_playfield_width, 128, WHITE);
-    DrawRectangle(0, 540/2 - 128/2 + 1, (int) m_playfield_width, 128-2, BLACK);
+    DrawRectangle(0, (int) m_playfield_origin_y, (int) m_playfield_width, (int) m_playfield_height, WHITE);
+    DrawRectangle(0, (int) m_playfield_origin_y + 1, (int) m_playfield_width, (int) m_playfield_height-2, BLACK);
 
+    DrawLeftPart();
+
+    //From this point the Y axes is flipped
     BeginMode3D(m_camera);
     BeginShaderMode(m_shader);
 
@@ -109,27 +138,12 @@ void TaikoRulesetRaylib::Draw() {
     //Hit receptor
     DrawBillboardPro(m_camera,
         m_receptor_texture, {0.f, 0.f, (float) m_receptor_texture.width, (float) m_receptor_texture.height},
-        {192, 540.f/2.f, -100},
+        {m_receptor_center_x, m_playfield_center_y, -100},
         {0, 1, 0},
-        {85, 85}, {85.f/2.f, 85.f/2.f}, 0,
+        {85, 85}, {85.f/2.f, 85.f/2.f}, 0, //TODO : adapt size using playfield height
         WHITE);
 
-    //Draw barlines
-    int barline_out_count = 0;
-    //printf("%i\n", m_first_effect_point);
-    for (int i = m_first_effect_point; i < beatmap->m_effect_point_count; ++i) {
-        TaikoEffectPoint *effect_point = &(beatmap->m_effect_points[i]);
-        float position = TimeToPosition(effect_point->time, current_time);
-
-        if (position >= 1) {
-            ++barline_out_count;
-            if (barline_out_count >= 15) break;
-            continue;
-        }
-        barline_out_count = 0;
-
-        DrawLine(192 + position*m_object_travel_distance, 540/2-64, 192 + position*m_object_travel_distance, 540/2+64, GRAY);
-    }
+    DrawBarLines(current_time);
 
     DrawHits(current_time);
     DrawDrumRolls(current_time);
@@ -142,10 +156,53 @@ void TaikoRulesetRaylib::Draw() {
 ///////////////////////////
 /// PRIVATE
 
+void TaikoRulesetRaylib::DrawLeftPart() {
+    //Background
+    DrawTexturePro(m_playfield_left_texture, {0.f, 0.f, (float) m_playfield_left_texture.width, (float) m_playfield_left_texture.height},
+        {0.f, m_playfield_origin_y, m_playfield_height, m_playfield_height},
+        {0.f, 0.f}, 0.f,
+        WHITE);
+
+    //Keys
+    for (int i = 0; i < 4; ++i) {
+        if (m_keys_opacity[i] <= 0.f) continue;
+
+        DrawTexturePro(m_playfield_left_keys_textures[i],
+            {0.f, 0.f, (float) m_playfield_left_keys_textures[i].width, (float) m_playfield_left_keys_textures[i].height},
+            {0.f, m_playfield_origin_y, m_playfield_height, m_playfield_height},
+            {0.f, 0.f}, 0.f,
+            {255, 255, 255, (unsigned char)(255.f*m_keys_opacity[i])});
+    }
+}
+
+void TaikoRulesetRaylib::DrawBarLines(int current_time) {
+    auto beatmap = GetBeatmap<TaikoBeatmap>();
+
+    int barline_out_count = 0;
+    //printf("%i\n", m_first_effect_point);
+    for (int i = m_first_effect_point; i < beatmap->m_effect_point_count; ++i) {
+        //TODO: effect points have the ability to hide their barline, this case isn't handled
+        TaikoEffectPoint *effect_point = &(beatmap->m_effect_points[i]);
+        float normalized_position = TimeToPosition(effect_point->time, current_time);
+
+        if (normalized_position >= 1) {
+            ++barline_out_count;
+            if (barline_out_count >= 10) break; //assume no more barlines are on screen
+            continue;
+        }
+        barline_out_count = 0;
+
+        DrawLine((int) m_receptor_center_x + normalized_position*m_object_travel_distance, (int)m_playfield_origin_y,
+            (int) m_receptor_center_x + normalized_position*m_object_travel_distance, (int)(m_playfield_origin_y+m_playfield_height),
+            GRAY);
+    }
+}
+
+
 void TaikoRulesetRaylib::DrawHits(int current_time) {
     auto beatmap = GetBeatmap<TaikoBeatmap>();
 
-    int out_count = 0;
+    //int out_count = 0;
     for (int i = m_first_hit_index; i < beatmap->m_hit_count; ++i) {
         TaikoHit *hit = &(beatmap->m_hits[i]);
 
@@ -165,7 +222,7 @@ bool TaikoRulesetRaylib::DrawHit(TaikoHit *hit, int current_time) {
     if (normalized_position >= 1) return false;
 
     //192 is the hit receptor position and 960 is the width of the playfield
-    float x = 192 + normalized_position*m_object_travel_distance;
+    float x = m_receptor_center_x + normalized_position*m_object_travel_distance;
     float size = (hit->IsStrong()) ? 115.f : 80.f;
     float origin = size/2.f;
 
@@ -177,14 +234,14 @@ bool TaikoRulesetRaylib::DrawHit(TaikoHit *hit, int current_time) {
 
     DrawBillboardPro(m_camera,
             m_small_hit_texture, {0.f, 0.f, (float) m_small_hit_texture.width, (float) m_small_hit_texture.height},
-            {x, 540.f/2, z},
+            {x, m_playfield_center_y, z},
             {0, 1, 0},
             {size, size}, {origin, origin}, 0,
             hit->IsBlue() ? BLUE : RED);
 
     DrawBillboardPro(m_camera,
         m_small_hit_overlay_texture, {0.f, 0.f, (float) m_small_hit_overlay_texture.width, (float) m_small_hit_overlay_texture.height},
-        {x, 540.f/2, z},
+        {x, m_playfield_center_y, z},
         {0, 1, 0},
         {size, size}, {origin, origin}, 0,
         WHITE);
@@ -217,8 +274,8 @@ bool TaikoRulesetRaylib::DrawDrumRoll(TaikoDrumRoll *drum_roll, int current_time
     //if there are timing points between them
     float normalized_position_tail = TimeToPosition(drum_roll->GetEndTime(), current_time, drum_roll->time);
 
-    float head_x = 192 + normalized_position_head*m_object_travel_distance;
-    float tail_x = 192 + normalized_position_tail*m_object_travel_distance;
+    float head_x = m_receptor_center_x + normalized_position_head*m_object_travel_distance;
+    float tail_x = m_receptor_center_x + normalized_position_tail*m_object_travel_distance;
     float size = drum_roll->strong ? 115.f : 80.f;
     float origin = size/2.f;
     float z = 5.f - (float)(drum_roll->time - current_time)/1000.f;
@@ -226,7 +283,7 @@ bool TaikoRulesetRaylib::DrawDrumRoll(TaikoDrumRoll *drum_roll, int current_time
     //Tail
     DrawBillboardPro(m_camera,
         m_drum_roll_tail_texture, {0.f, 0.f, (float) m_drum_roll_tail_texture.width, (float) m_drum_roll_tail_texture.height},
-        {tail_x, 540.f/2, z},
+        {tail_x, m_playfield_center_y, z},
         {0, 1, 0},
         {size, size}, {origin, origin}, 0,
         { 230, 220, 0, 255 });
@@ -234,7 +291,7 @@ bool TaikoRulesetRaylib::DrawDrumRoll(TaikoDrumRoll *drum_roll, int current_time
     //Middle part
     DrawBillboardPro(m_camera,
         m_drum_roll_middle_texture, {0.f, 0.f, (float) m_drum_roll_middle_texture.width, (float) m_drum_roll_middle_texture.height},
-        {head_x, 540.f/2, z},
+        {head_x, m_playfield_center_y, z},
         {0, 1, 0},
         {tail_x-head_x, size}, {0.f, origin}, 0,
         { 230, 220, 0, 255 });
@@ -242,18 +299,43 @@ bool TaikoRulesetRaylib::DrawDrumRoll(TaikoDrumRoll *drum_roll, int current_time
     //Head
     DrawBillboardPro(m_camera,
             m_small_hit_texture, {0.f, 0.f, (float) m_small_hit_texture.width, (float) m_small_hit_texture.height},
-            {head_x, 540.f/2, z},
+            {head_x, m_playfield_center_y, z},
             {0, 1, 0},
             {size, size}, {origin, origin}, 0,
             { 230, 220, 0, 255 });
 
     DrawBillboardPro(m_camera,
         m_small_hit_overlay_texture, {0.f, 0.f, (float) m_small_hit_overlay_texture.width, (float) m_small_hit_overlay_texture.height},
-        {head_x, 540.f/2, z},
+        {head_x, m_playfield_center_y, z},
         {0, 1, 0},
         {size, size}, {origin, origin}, 0,
         WHITE);
 
 
     return true;
+}
+
+
+void TaikoRulesetRaylib::SetPlayfieldY(float y) {
+    m_playfield_origin_y = y;
+    UpdatePlayfieldGeometry();
+}
+
+void TaikoRulesetRaylib::SetPlayfieldWidth(float width) {
+    if (width <= 0) return;
+    m_playfield_width = width;
+    //UpdatePlayfieldGeometry(0.f);
+    m_object_travel_distance = m_playfield_width - m_playfield_height;
+}
+
+void TaikoRulesetRaylib::SetPlayfieldHeight(float height) {
+    if (height <= 0) return;
+    m_playfield_height = height;
+    UpdatePlayfieldGeometry(0.f);
+}
+
+void TaikoRulesetRaylib::UpdatePlayfieldGeometry(float y_offset) {
+    m_playfield_center_y = m_playfield_origin_y + m_playfield_height/2;
+    m_object_travel_distance = m_playfield_width - m_playfield_height;
+    m_receptor_center_x = m_playfield_height * 1.5f;
 }

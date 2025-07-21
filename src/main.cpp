@@ -18,14 +18,14 @@ std::atomic<bool> g_running = true;
 
 
 int main() {
-    OsuBeatmap *beatmap = OsuBeatmap::load("res/sara_hito.txt");
+    OsuBeatmap *beatmap = OsuBeatmap::load("res/lagtrain.txt");
     TaikoBeatmap *taiko_beatmap = TaikoBeatmap::FromOsuBeatmap(beatmap);
     delete beatmap;
     if (taiko_beatmap == nullptr) return 1;
 
     SetLastFrameTimeToNow();
 
-    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+    //SetConfigFlags(FLAG_WINDOW_RESIZABLE); //crashes on multithreaded mode, let's not do that
     InitWindow(960, 540, "taco test");
     InitAudioDevice();
     SetTargetFPS(60);
@@ -53,8 +53,8 @@ int main() {
 
 #if !SINGLE_THREAD_INPUT
         int input_iterations = GetInputThreadIterations();
-        if (input_iterations < 5) printf("Low input thread iteration count\n");
-        DrawText(TextFormat("%d IPF", input_iterations), 90, 10, 20, GREEN);
+        //if (input_iterations < 5) printf("Low input thread iteration count\n");
+        //DrawText(TextFormat("%d IPF", input_iterations), 90, 10, 20, GREEN);
 #endif
 
         SetLastFrameTimeToNow();
@@ -68,6 +68,5 @@ int main() {
     CloseAudioDevice();
     CloseWindow();
 
-    delete taiko_beatmap;
     return 0;
 }
