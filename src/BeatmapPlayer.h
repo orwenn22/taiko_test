@@ -1,8 +1,8 @@
 #ifndef BEATMAPPLAYER_H
 #define BEATMAPPLAYER_H
 
-#include "InputHandling.h"
-#include "Ruleset.h"
+#include "Input/InputHandling.h"
+#include "Ruleset/Ruleset.h"
 
 
 class Beatmap;

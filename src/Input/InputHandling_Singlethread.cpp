@@ -1,10 +1,10 @@
-#include "Config.h"
+#include "../Config.h"
 #if SINGLE_THREAD_INPUT
 
 #include <cstdlib>
 
 #include "InputHandling.h"
-#include "main.h"
+#include "../main.h"
 #include "raylib.h"
 
 static int *s_keys = nullptr; //Store all the keys we should check

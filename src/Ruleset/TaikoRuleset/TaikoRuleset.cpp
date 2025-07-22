@@ -2,13 +2,13 @@
 
 #include <cstdio>
 
-#include "../BeatmapPlayer.h"
-#include "../TaikoBeatmap/TaikoBeatmap.h"
+#include "../../BeatmapPlayer.h"
+#include "../../Beatmap/TaikoBeatmap/TaikoBeatmap.h"
 
-#include "../TaikoBeatmap/TaikoDrumRoll.h"
-#include "../TaikoBeatmap/TaikoEffectPoint.h"
-#include "../TaikoBeatmap/TaikoHit.h"
-#include "../TaikoBeatmap/TaikoTimingPoint.h"
+#include "../../Beatmap/TaikoBeatmap/TaikoDrumRoll.h"
+#include "../../Beatmap/TaikoBeatmap/TaikoEffectPoint.h"
+#include "../../Beatmap/TaikoBeatmap/TaikoHit.h"
+#include "../../Beatmap/TaikoBeatmap/TaikoTimingPoint.h"
 
 static RulesetRating s_taiko_ratings[] = {
     {"Great", 300, 300, false, true, false, 0xFFFF5050},

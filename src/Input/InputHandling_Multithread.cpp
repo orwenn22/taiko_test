@@ -1,4 +1,4 @@
-#include "Config.h"
+#include "../Config.h"
 #if !SINGLE_THREAD_INPUT
 
 #include "InputHandling.h"

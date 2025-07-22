@@ -6,13 +6,12 @@
 
 #include "BeatmapPlayer.h"
 #include "Config.h"
-#include "InputHandling.h"
+#include "Input/InputHandling.h"
 #include "raylib.h"
-#include "TaikoRuleset/TaikoRuleset.h"
+#include "Ruleset/TaikoRuleset/TaikoRulesetRaylib.h"
 #include "Time.h"
-#include "OsuBeatmap/OsuBeatmap.h"
-#include "TaikoBeatmap/TaikoBeatmap.h"
-#include "TaikoRuleset/TaikoRulesetRaylib.h"
+#include "Beatmap/OsuBeatmap/OsuBeatmap.h"
+#include "Beatmap/TaikoBeatmap/TaikoBeatmap.h"
 
 std::atomic<bool> g_running = true;
 

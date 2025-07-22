@@ -7,7 +7,7 @@
 
 #include "OsuHitObject.h"
 #include "OsuTimingPoint.h"
-#include "../Utils.h"
+#include "../../Utils.h"
 
 enum FileFormatSection {
     None,

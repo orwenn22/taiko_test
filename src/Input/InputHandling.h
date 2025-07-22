@@ -5,7 +5,7 @@
 #include <cstddef>
 #include <queue>
 
-#include "Config.h"
+#include "../Config.h"
 
 struct InputEvent {
     int key;

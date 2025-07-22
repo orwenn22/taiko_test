@@ -1,12 +1,11 @@
 #include "TaikoRulesetRaylib.h"
 
-#include "raymath.h"
-#include "rlgl.h"
-#include "../BeatmapPlayer.h"
-#include "../TaikoBeatmap/TaikoBeatmap.h"
-#include "../TaikoBeatmap/TaikoDrumRoll.h"
-#include "../TaikoBeatmap/TaikoEffectPoint.h"
-#include "../TaikoBeatmap/TaikoHit.h"
+
+#include "../../BeatmapPlayer.h"
+#include "../../Beatmap/TaikoBeatmap/TaikoBeatmap.h"
+#include "../../Beatmap/TaikoBeatmap/TaikoDrumRoll.h"
+#include "../../Beatmap/TaikoBeatmap/TaikoEffectPoint.h"
+#include "../../Beatmap/TaikoBeatmap/TaikoHit.h"
 
 
 static RulesetInput s_taiko_inputs_raylib[] = {

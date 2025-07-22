@@ -2,11 +2,11 @@
 
 #include <cstdlib>
 
-#include "Beatmap.h"
+#include "Beatmap/Beatmap.h"
 #include "main.h"
 #include "raylib.h"
-#include "Ruleset.h"
-#include "Utils.h"
+#include "Ruleset/Ruleset.h"
+#include "Platform/Raylib/UtilsRaylib.h"
 
 
 
@@ -55,7 +55,7 @@ void BeatmapPlayer::Draw() {
 
     int y = 28;
     for (int i = 0; i < m_ruleset->m_rating_count; ++i) {
-        DrawText(m_ruleset->m_ratings[i].name, 10, y, 20, PspColorToRaylib(m_ruleset->m_ratings[i].color));
+        DrawText(m_ruleset->m_ratings[i].name, 10, y, 20, ABGR8888ColorToRaylib(m_ruleset->m_ratings[i].color));
         DrawText(TextFormat("%d", m_judgements[i]), 145, y, 20, WHITE);
         y += 20;
     }

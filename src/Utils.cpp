@@ -65,13 +65,3 @@ int CountCharUntil(const char *str, char c, size_t start_location, char stop_cha
 
     return count;
 }
-
-
-Color PspColorToRaylib(uint32_t color) {
-    return {
-        (unsigned char)(color & 0xff),
-        (unsigned char)((color >> 8) & 0xff),
-        (unsigned char)((color >> 16) & 0xff),
-        (unsigned char)((color >> 24) & 0xff)
-    };
-}
