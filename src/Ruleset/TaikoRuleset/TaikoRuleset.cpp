@@ -2,7 +2,7 @@
 
 #include <cstdio>
 
-#include "../../BeatmapPlayer.h"
+#include "../../BeatmapPlayer/BeatmapPlayer.h"
 #include "../../Beatmap/TaikoBeatmap/TaikoBeatmap.h"
 
 #include "../../Beatmap/TaikoBeatmap/TaikoDrumRoll.h"

@@ -1,10 +1,8 @@
 #include <atomic>
 #include <chrono>
-#include <iostream>
 #include <thread>
 #include <bits/shared_ptr_atomic.h>
 
-#include "BeatmapPlayer.h"
 #include "Config.h"
 #include "Input/InputHandling.h"
 #include "raylib.h"
@@ -12,6 +10,7 @@
 #include "Time.h"
 #include "Beatmap/OsuBeatmap/OsuBeatmap.h"
 #include "Beatmap/TaikoBeatmap/TaikoBeatmap.h"
+#include "BeatmapPlayer/BeatmapPlayerRaylib.h"
 
 std::atomic<bool> g_running = true;
 
@@ -31,7 +30,7 @@ int main() {
 
     InitInputHandling();
 
-    BeatmapPlayer *player = new BeatmapPlayer(new TaikoRulesetRaylib, taiko_beatmap);
+    BeatmapPlayer *player = new BeatmapPlayerRaylib(new TaikoRulesetRaylib, taiko_beatmap);
 
     while (!WindowShouldClose() && g_running.load()) {
         //Get inputs

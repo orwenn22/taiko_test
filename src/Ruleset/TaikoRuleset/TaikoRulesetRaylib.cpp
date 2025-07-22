@@ -1,7 +1,7 @@
 #include "TaikoRulesetRaylib.h"
 
 
-#include "../../BeatmapPlayer.h"
+#include "../../BeatmapPlayer/BeatmapPlayer.h"
 #include "../../Beatmap/TaikoBeatmap/TaikoBeatmap.h"
 #include "../../Beatmap/TaikoBeatmap/TaikoDrumRoll.h"
 #include "../../Beatmap/TaikoBeatmap/TaikoEffectPoint.h"
@@ -62,10 +62,10 @@ void TaikoRulesetRaylib::LoadResources() {
     m_shader = LoadShader("res/shader/discard_transparent.vs", "res/shader/discard_transparent.fs");
 }
 
-void TaikoRulesetRaylib::OnGameStart() {
-    TaikoRuleset::OnGameStart();
+void TaikoRulesetRaylib::StartAudio(float offset) {
+    //TaikoRuleset::StartAudio(offset);
     if (m_audio.ctxData != nullptr) {
-        SeekMusicStream(m_audio, 0.f);
+        SeekMusicStream(m_audio, offset);
         PlayMusicStream(m_audio);
     }
 }

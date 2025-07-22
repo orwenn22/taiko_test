@@ -15,7 +15,7 @@ public:
     ~TaikoRulesetRaylib() override;
 
     void LoadResources() override;
-    void OnGameStart() override;
+    void StartAudio(float offset) override;
     void OnGameEnd() override;
     void HandleInput(const RulesetInputMessage &message) override;
     void Update(float dt) override;

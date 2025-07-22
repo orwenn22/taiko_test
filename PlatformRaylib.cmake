@@ -19,8 +19,8 @@ add_executable(${PROJECT_NAME} src/main.cpp
         src/Beatmap/TaikoBeatmap/TaikoHit.cpp
         src/Beatmap/TaikoBeatmap/TaikoEffectPoint.cpp
         src/Beatmap/TaikoBeatmap/TaikoEffectPoint.h
-        src/BeatmapPlayer.cpp
-        src/BeatmapPlayer.h
+        src/BeatmapPlayer/BeatmapPlayer.cpp
+        src/BeatmapPlayer/BeatmapPlayer.h
         src/Ruleset/Ruleset.cpp
         src/Ruleset/Ruleset.h
         src/Beatmap/Beatmap.cpp
@@ -41,6 +41,8 @@ add_executable(${PROJECT_NAME} src/main.cpp
         src/Ruleset/TaikoRuleset/TaikoRulesetRaylib.cpp
         src/Ruleset/TaikoRuleset/TaikoRulesetRaylib.h
         src/Platform/Raylib/UtilsRaylib.cpp
-        src/Platform/Raylib/UtilsRaylib.h)
+        src/Platform/Raylib/UtilsRaylib.h
+        src/BeatmapPlayer/BeatmapPlayerRaylib.cpp
+        src/BeatmapPlayer/BeatmapPlayerRaylib.h)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE raylib)

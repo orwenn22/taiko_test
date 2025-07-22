@@ -59,6 +59,9 @@ public:
     //Called when the game is starting
     virtual void OnGameStart();
 
+    //Called when the timer of the BeatmapPlayer reaches 0s
+    virtual void StartAudio(float offset);
+
     //The player will call this to know if the map is over. If it is, it should display some kind of result screen in the future.
     virtual bool IsOver();
 
@@ -81,6 +84,9 @@ public:
     BeatmapT *GetBeatmap() { return (BeatmapT *) m_beatmap; }
 
     BeatmapPlayer *GetPlayer() { return m_player; }
+
+    int GetRatingCount() { return m_rating_count; }
+    RulesetRating *GetRatings() { return m_ratings; }
 
 private:
     friend BeatmapPlayer;

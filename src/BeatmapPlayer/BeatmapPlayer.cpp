@@ -2,15 +2,16 @@
 
 #include <cstdlib>
 
-#include "Beatmap/Beatmap.h"
-#include "main.h"
-#include "raylib.h"
-#include "Ruleset/Ruleset.h"
-#include "Platform/Raylib/UtilsRaylib.h"
+#include "../Beatmap/Beatmap.h"
+#include "../Ruleset/Ruleset.h"
 
 
 
-BeatmapPlayer::BeatmapPlayer(Ruleset *ruleset, Beatmap *beatmap) : m_ruleset(ruleset), m_beatmap(beatmap), m_time(.0f), m_judgements(nullptr), m_max_rating(0), m_current_rating(0), m_bonus_rating(0), m_combo(0), m_max_combo(0), m_health(100.f) {
+BeatmapPlayer::BeatmapPlayer(Ruleset *ruleset, Beatmap *beatmap)
+    : m_ruleset(ruleset), m_beatmap(beatmap),
+      m_time(-2.f), m_judgements(nullptr), m_max_rating(0), m_current_rating(0), m_bonus_rating(0),
+      m_combo(0), m_max_combo(0), m_health(100.f),
+      m_music_started(false) {
     m_latest_hit_difference = 0;
     m_have_hit_difference = false;
 
@@ -32,7 +33,7 @@ BeatmapPlayer::~BeatmapPlayer() {
 
 
 void BeatmapPlayer::HandleInput(const InputEvent &input) {
-    //we keep track of the time since the start of the beatmap in a float (
+    //Time of the previous frame
     int last_time_ms = (int)(m_time*1000.f);
 
     //TODO: maybe in the case of multithreading we should add dt to the input's timestamp?
@@ -46,36 +47,18 @@ void BeatmapPlayer::HandleInput(const InputEvent &input) {
 
 
 void BeatmapPlayer::Update(float dt) {
+    if (m_ruleset == nullptr) return;
+
     m_ruleset->Update(dt);
     m_time += dt;
-}
 
-void BeatmapPlayer::Draw() {
-    m_ruleset->Draw();
-
-    int y = 28;
-    for (int i = 0; i < m_ruleset->m_rating_count; ++i) {
-        DrawText(m_ruleset->m_ratings[i].name, 10, y, 20, ABGR8888ColorToRaylib(m_ruleset->m_ratings[i].color));
-        DrawText(TextFormat("%d", m_judgements[i]), 145, y, 20, WHITE);
-        y += 20;
-    }
-
-    DrawText("Acc", 10, y, 20, PINK);
-    DrawText(TextFormat("%.2f%%", (float)m_current_rating / (float)m_max_rating * 100.f), 145, y, 20, WHITE);
-    y += 20;
-
-    DrawText("Combo", 10, y, 20, YELLOW);
-    DrawText(TextFormat("%d", m_combo), 145, y, 20, WHITE);
-    y += 20;
-
-    DrawText("Time", 10, y, 20, WHITE);
-    DrawText(TextFormat("%.2f (Over: %d)", m_time, m_ruleset->IsOver()), 145, y, 20, WHITE);
-    y += 20;
-
-    if (m_have_hit_difference) {
-        DrawText(TextFormat("%d ms", m_latest_hit_difference), 10, 340, 20, YELLOW);
+    const float audio_offset = 0.f; //TODO: this should be configurable in the future
+    if (!m_music_started && m_time >= audio_offset) {
+        m_ruleset->StartAudio(m_time-audio_offset);
+        m_music_started = true;
     }
 }
+
 
 void BeatmapPlayer::ApplyRating(int rating) {
     if (rating < 0 || rating >= m_ruleset->m_rating_count) return;

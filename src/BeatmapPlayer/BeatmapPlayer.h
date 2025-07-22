@@ -1,8 +1,8 @@
 #ifndef BEATMAPPLAYER_H
 #define BEATMAPPLAYER_H
 
-#include "Input/InputHandling.h"
-#include "Ruleset/Ruleset.h"
+#include "../Input/InputHandling.h"
+#include "../Ruleset/Ruleset.h"
 
 
 class Beatmap;
@@ -11,11 +11,11 @@ class Ruleset;
 class BeatmapPlayer {
 public:
     BeatmapPlayer(Ruleset *ruleset, Beatmap *beatmap);
-    ~BeatmapPlayer();
+    virtual ~BeatmapPlayer();
 
     void HandleInput(const InputEvent &input);
     void Update(float dt);
-    void Draw();
+    virtual void Draw() = 0;
 
     float GetTime() { return m_time; }
 
@@ -29,7 +29,7 @@ public:
 
     float m_health;
 
-private:
+protected:
     Ruleset *m_ruleset;
     Beatmap *m_beatmap;
 
@@ -47,6 +47,9 @@ private:
     //This is temporary
     int m_latest_hit_difference;
     bool m_have_hit_difference;
+
+    //TODO: maybe the ruleset should keep track of if the music is playing or not instead of the player?
+    bool m_music_started;
 };
 
 

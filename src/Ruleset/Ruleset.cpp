@@ -15,6 +15,10 @@ Ruleset::~Ruleset() = default;
 
 void Ruleset::LoadResources() { /* nothing */ }
 void Ruleset::OnGameStart() { /* nothing */ }
+
+//TODO: maybe a default behavior to start the audio should be implemented in Ruleset?
+void Ruleset::StartAudio(float offset) { /* nothing */ }
+
 bool Ruleset::IsOver() { return true; }
 void Ruleset::OnGameEnd() { /* noting */ }
 bool Ruleset::ShouldFail() { return false; }
