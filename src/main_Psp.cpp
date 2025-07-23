@@ -56,8 +56,7 @@ int main() {
         EndFrame();
     }
 
-    //TODO: remove this whenever we actually get the beatmap player on the psp
-    delete taiko_beatmap;
+    //delete beatmap_player;
 
     CloseInputHandling();
     EndCore();
