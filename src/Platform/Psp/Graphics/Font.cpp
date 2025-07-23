@@ -25,5 +25,6 @@ Font *Font::FromPath(const char *path, int char_width, int char_height) {
     if (path == nullptr || char_width <= 0 || char_height <= 0) return nullptr;
     Texture *texture = Texture::Load(path);
     if (texture == nullptr) return nullptr;
+    texture->Swizzle();
     return new Font(texture, char_width, char_height, true);
 }

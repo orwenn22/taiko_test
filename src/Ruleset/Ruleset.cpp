@@ -1,7 +1,5 @@
 #include "Ruleset.h"
 
-#include <raylib.h>
-
 RulesetRating default_ruleset_rating[] = {
     {"Perfect", 300, false, false, true, false, 0xFFFF5050},
     {"Miss", 0, false, false, false, true, 0xFF0000FF}

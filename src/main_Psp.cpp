@@ -8,7 +8,9 @@
 
 #include "Beatmap/OsuBeatmap/OsuBeatmap.h"
 #include "Beatmap/TaikoBeatmap/TaikoBeatmap.h"
+#include "BeatmapPlayer/BeatmapPlayerPsp.h"
 #include "Input/InputHandling.h"
+#include "Ruleset/TaikoRuleset/TaikoRulesetPsp.h"
 
 PSP_MODULE_INFO("taco_test", 0, 1, 0);
 PSP_MAIN_THREAD_ATTR(THREAD_ATTR_VFPU | THREAD_ATTR_USER);
@@ -28,40 +30,27 @@ int main() {
     TaikoBeatmap *taiko_beatmap = TaikoBeatmap::FromOsuBeatmap(beatmap);
     delete beatmap;
 
+    BeatmapPlayerPsp *beatmap_player = new BeatmapPlayerPsp(new TaikoRulesetPsp, taiko_beatmap);
+
     std::queue<InputEvent> input_queue;
-    int input_queue_count = 0;
-    int total_input_queue_count = 0;
     while (ShouldClose()) {
-        input_queue_count = 0;
         PollInputEvents(input_queue);
         while (!input_queue.empty()) {
-            ++input_queue_count;
-            ++total_input_queue_count;
+            beatmap_player->HandleInput(input_queue.front());
             input_queue.pop();
         }
-        //update stuff here
+
+        beatmap_player->Update(GetDeltaTime());
 
         StartFrame();
 
         clearBackground(0xFF000000);
-        DrawText("hi, this is a placeholder text\nfor the psp platform, hopefully\nthis becomes playable someday", g_default_font, {2.f, 2.f}, 0.f, 1.f, 0xFFFFFFFF);
 
-        char buf[48];
+        beatmap_player->Draw();
 
-        snprintf(buf, 48, "hits: %d", taiko_beatmap->m_hit_count);
-        DrawText(buf, g_default_font, {2.f, 80.f}, 0.f, 1.f, 0xFFFFFFFF);
-
-        sniprintf(buf, 48, "effect points: %d", taiko_beatmap->m_effect_point_count);
-        DrawText(buf, g_default_font, {2.f, 100.f}, 0.f, 1.f, 0xFFFFFFFF);
-
-        sniprintf(buf, 48, "timing points: %d", taiko_beatmap->m_timing_point_count);
-        DrawText(buf, g_default_font, {2.f, 120.f}, 0.f, 1.f, 0xFFFFFFFF);
-
-        snprintf(buf, 48, "drum rolls: %d", taiko_beatmap->m_drum_roll_count);
-        DrawText(buf, g_default_font, {2.f, 140.f}, 0.f, 1.f, 0xFFFFFFFF);
-
-        sniprintf(buf, 48, "input events: %d (%d)", input_queue_count, total_input_queue_count);
-        DrawText(buf, g_default_font, {2.f, 160.f}, 0.f, 1.f, 0xFFFFFFFF);
+        char fps_buf[32];
+        snprintf(fps_buf, 32, "FPS: %.0f", GetFPS());
+        DrawText(fps_buf, g_default_font, {SCREEN_WIDTH-80, 2.f}, 0.f, 1, 0xFF00AA00);
 
         //SetLastFrameTimeToNow();
         EndFrame();

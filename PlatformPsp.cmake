@@ -36,7 +36,17 @@ add_executable(${PROJECT_NAME} src/main_Psp.cpp
         src/Platform/Psp/Rectangle.h
         src/Platform/Psp/Graphics/Vertex.h
         src/Input/InputHandling_Psp.cpp
-        src/Input/InputHandling.h)
+        src/Input/InputHandling.h
+        src/BeatmapPlayer/BeatmapPlayer.cpp
+        src/BeatmapPlayer/BeatmapPlayer.h
+        src/BeatmapPlayer/BeatmapPlayerPsp.cpp
+        src/BeatmapPlayer/BeatmapPlayerPsp.h
+        src/Ruleset/Ruleset.cpp
+        src/Ruleset/Ruleset.h
+        src/Ruleset/TaikoRuleset/TaikoRuleset.cpp
+        src/Ruleset/TaikoRuleset/TaikoRuleset.h
+        src/Ruleset/TaikoRuleset/TaikoRulesetPsp.cpp
+        src/Ruleset/TaikoRuleset/TaikoRulesetPsp.h)
 
 # TODO: remove all the unnecessary stuff
 target_link_libraries(${PROJECT_NAME} PRIVATE
