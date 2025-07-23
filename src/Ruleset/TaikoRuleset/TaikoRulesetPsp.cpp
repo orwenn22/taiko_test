@@ -243,7 +243,6 @@ void TaikoRulesetPsp::DrawHits(int current_time) {
     const int hit_batch_count = 10; //the amount of hits we batch together
     int current_hit = m_first_hit_index; //the current hit we are drawing
     bool keep_looping = true;
-    int out_count = 0;
 
     sceGuEnable(GU_TEXTURE_2D);
     while (keep_looping) {
@@ -259,16 +258,6 @@ void TaikoRulesetPsp::DrawHits(int current_time) {
 
                 //If the current hit is visible, it vertices has been passed in the array
                 ++i; //go to next location in array
-                out_count = 0;
-            }
-            else {
-                ++out_count;
-            }
-
-            //stop drawing hits if 10 consecutive are offscreen
-            if (out_count >= 10) {
-                keep_looping = false;
-                break;
             }
 
             ++current_hit;

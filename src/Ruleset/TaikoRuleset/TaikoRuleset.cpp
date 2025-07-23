@@ -103,7 +103,8 @@ float TaikoRuleset::TimeToPosition(int time, int current_time) {
 float TaikoRuleset::TimeToPosition(int time, int current_time, int effect_time) {
     float normalized_position_no_effects = (float)(time-current_time) / 3000.f; //3000 found by comparing side to side with lazer
 
-    TaikoEffectPoint *effect_point = GetEffectPointForTime(effect_time);
+    //Get the corresponding effect point in order to apply the scroll effect
+    TaikoEffectPoint *effect_point = GetBeatmap<TaikoBeatmap>()->GetEffectPointForTime(effect_time);
 
     //Ok, so i had no idea BPM affects scrolling, shoutout to this guy https://osu.ppy.sh/community/forums/topics/1851087?n=1
     TaikoTimingPoint *timing_point = GetBeatmap<TaikoBeatmap>()->GetTimingPointForTime(effect_time);
@@ -119,29 +120,6 @@ float TaikoRuleset::TimeToPosition(int time, int current_time, int effect_time) 
     return normalized_position;
 }
 
-
-//TODO: eventually fully get rid of this, optimize the one from TaikoBeatmap and relly on that one instead.
-//      this is here only because it's somewhat more efficient in the context of gameplay.
-TaikoEffectPoint *TaikoRuleset::GetEffectPointForTime(int time) {
-    TaikoEffectPoint *effect_points = GetBeatmap<TaikoBeatmap>()->m_effect_points;
-    int effect_point_count = GetBeatmap<TaikoBeatmap>()->m_effect_point_count;
-
-    //idk do these just in case
-    if (time < effect_points[0].time) return &effect_points[0];
-    if (time >= effect_points[effect_point_count-1].time) return &effect_points[effect_point_count-1];
-
-    //FIXME: this is an attempt to optimize effect point lookups for objects located after the current timing point
-    int first_i;
-    if (m_first_effect_point >= effect_point_count || m_first_effect_point == 0 || time < effect_points[m_first_effect_point].time) first_i = 0;
-    else first_i = m_first_effect_point-1; //Don't check past timing points when possible
-
-    for (int i = first_i; i < effect_point_count-1; ++i) {
-        if (time >= effect_points[i].time && time < effect_points[i+1].time) return &effect_points[i];
-    }
-
-    //This should never get reached, but doing it just in case
-    return &effect_points[GetBeatmap<TaikoBeatmap>()->m_effect_point_count-1];
-}
 
 void TaikoRuleset::ComputeHitWindows() {
     auto beatmap = GetBeatmap<TaikoBeatmap>();

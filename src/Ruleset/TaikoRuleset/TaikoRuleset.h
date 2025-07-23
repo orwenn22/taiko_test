@@ -40,8 +40,6 @@ protected:
     //(meant for drum roll tail that always moves at the same speed as the head)
     float TimeToPosition(int time, int current_time, int effect_time);
 
-    TaikoEffectPoint *GetEffectPointForTime(int time);
-
     void ComputeHitWindows();
 
     bool HandleStrongNote(const RulesetInputMessage &message);

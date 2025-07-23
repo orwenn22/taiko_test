@@ -177,34 +177,52 @@ TaikoBeatmap::~TaikoBeatmap() {
 }
 
 
-TaikoTimingPoint *TaikoBeatmap::GetTimingPointForTime(int time) {
-    if (m_timing_point_count == 0) return nullptr;
+TaikoTimingPoint* TaikoBeatmap::GetTimingPointForTime(int time) {
+    if (m_timing_point_count == 0 || m_timing_points == nullptr) return nullptr;
 
-    //idk do these just in case
-    if (time < m_timing_points[0].time) return &m_timing_points[0];
-    if (time >= m_timing_points[m_timing_point_count-1].time) return &m_timing_points[m_timing_point_count-1];
+    size_t left = 0;
+    size_t right = m_timing_point_count - 1;
 
+    if (time < m_timing_points[0].time) return &m_timing_points[0]; //before first point
+    if (time >= m_timing_points[right].time) return &m_timing_points[right]; //after last point
 
-    for (int i = 0; i < m_timing_point_count-1; ++i) {
-        if (time >= m_timing_points[i].time && time < m_timing_points[i+1].time) return &m_timing_points[i];
+    while (left <= right) {
+        size_t mid = (left + right) / 2;
+
+        if (time >= m_timing_points[mid].time) {
+            if (mid + 1 < m_timing_point_count && time < m_timing_points[mid + 1].time) {
+                return &m_timing_points[mid]; //we found the correct point :D
+            }
+            left = mid + 1;
+        } else {
+            right = mid - 1;
+        }
     }
 
-    //This should never get reached, but doing it just in case
-    return &m_timing_points[m_timing_point_count-1];
+    return &m_timing_points[m_timing_point_count - 1]; //fallback, should not be hit
 }
 
-TaikoEffectPoint * TaikoBeatmap::GetEffectPointForTime(int time) {
-    if (m_effect_point_count == 0) return nullptr;
+TaikoEffectPoint* TaikoBeatmap::GetEffectPointForTime(int time) {
+    if (m_effect_point_count == 0 || m_effect_points == nullptr) return nullptr;
 
-    //idk do these just in case
-    if (time < m_effect_points[0].time) return &m_effect_points[0];
-    if (time >= m_effect_points[m_effect_point_count-1].time) return &m_effect_points[m_effect_point_count-1];
+    size_t left = 0;
+    size_t right = m_effect_point_count - 1;
 
+    if (time < m_effect_points[0].time) return &m_effect_points[0]; //before first point
+    if (time >= m_effect_points[right].time) return &m_effect_points[right]; //after last point
 
-    for (int i = 0; i < m_effect_point_count-1; ++i) {
-        if (time >= m_effect_points[i].time && time < m_effect_points[i+1].time) return &m_effect_points[i];
+    while (left <= right) {
+        size_t mid = (left + right) / 2;
+
+        if (m_effect_points[mid].time <= time) {
+            if (mid + 1 < m_effect_point_count && m_effect_points[mid + 1].time > time) {
+                return &m_effect_points[mid]; //we found the correct point :D
+            }
+            left = mid + 1;
+        } else {
+            right = mid - 1;
+        }
     }
 
-    //This should never get reached, but doing it just in case
-    return &m_effect_points[m_effect_point_count-1];
+    return &m_effect_points[m_effect_point_count - 1]; //fallback, should not be hit
 }
