@@ -46,7 +46,17 @@ add_executable(${PROJECT_NAME} src/main_Psp.cpp
         src/Ruleset/TaikoRuleset/TaikoRuleset.cpp
         src/Ruleset/TaikoRuleset/TaikoRuleset.h
         src/Ruleset/TaikoRuleset/TaikoRulesetPsp.cpp
-        src/Ruleset/TaikoRuleset/TaikoRulesetPsp.h)
+        src/Ruleset/TaikoRuleset/TaikoRulesetPsp.h
+        src/Platform/Psp/Audio/AudioStream.cpp
+        src/Platform/Psp/Audio/AudioStream.h
+        src/Platform/Psp/Audio/AudioStreamMP3.cpp
+        src/Platform/Psp/Audio/AudioStreamMP3.h
+        src/Platform/Psp/Audio/AudioThread.cpp
+        src/Platform/Psp/Audio/AudioThread.h
+        src/Platform/Psp/Audio/AudioStreamOGG.cpp
+        src/Platform/Psp/Audio/AudioStreamOGG.h
+        src/Platform/Psp/Audio/resample.cpp
+        src/Platform/Psp/Audio/resample.h)
 
 # TODO: remove all the unnecessary stuff
 target_link_libraries(${PROJECT_NAME} PRIVATE
@@ -56,6 +66,13 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
         pspgum
         pspge
         pspdisplay
+        pspaudio
+        pspaudiolib
+)
+
+target_include_directories(${PROJECT_NAME} PRIVATE
+    external/minimp3
+    external/stb_vorbis
 )
 
 # EBOOT.PBP

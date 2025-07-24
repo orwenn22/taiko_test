@@ -1,9 +1,6 @@
-//
-// Created by orwenn on 7/23/25.
-//
-
 #include "TaikoRulesetPsp.h"
 
+#include <cstdio>
 #include <pspctrl.h>
 #include <pspgum.h>
 
@@ -12,6 +9,7 @@
 #include "../../Beatmap/TaikoBeatmap/TaikoHit.h"
 #include "../../BeatmapPlayer/BeatmapPlayer.h"
 #include "../../Platform/Psp/Core.h"
+#include "../../Platform/Psp/Audio/AudioThread.h"
 #include "../../Platform/Psp/Graphics/2d.h"
 #include "../../Platform/Psp/Graphics/Texture.h"
 #include "../../Platform/Psp/Graphics/Vertex.h"
@@ -36,16 +34,23 @@ TaikoRulesetPsp::TaikoRulesetPsp() : TaikoRuleset(s_taiko_inputs_psp, s_taiko_in
 
 TaikoRulesetPsp::~TaikoRulesetPsp() {
     delete m_taiko_sheet;
+    delete m_audio;
 }
 
 void TaikoRulesetPsp::LoadResources() {
     TaikoRuleset::LoadResources();
     m_taiko_sheet = Texture::Load("res/skin/Taiko/sheet.png");
     m_taiko_sheet->Swizzle();
+
+    char file_path_buf[64];
+    snprintf(file_path_buf, 64, "res/%s", GetBeatmap<TaikoBeatmap>()->m_audio_filename);
+    m_audio = AudioStream::InitStream(file_path_buf);
 }
 
 void TaikoRulesetPsp::StartAudio(float offset) {
     TaikoRuleset::StartAudio(offset);
+    SetCurrentAudioStream(m_audio);
+    //m_audio->Seek(offset); //FIXME: weird audio artefacts
 }
 
 void TaikoRulesetPsp::OnGameEnd() {

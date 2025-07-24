@@ -4,6 +4,7 @@
 #include "TaikoRuleset.h"
 
 #include "../../Platform/Psp/Graphics/Vertex.h"
+#include "../../Platform/Psp/Audio/AudioStream.h"
 
 struct TaikoHit;
 struct Texture;
@@ -33,6 +34,7 @@ private:
     bool GetHitVertices(int current_time, TaikoHit *taiko_hit, Vertex_UV32_Color32_XYZ32 *vertices_out, uint8_t *indices_out);
 
     Texture *m_taiko_sheet;
+    AudioStream *m_audio;
 
     float m_keys_opacity[4];
 };

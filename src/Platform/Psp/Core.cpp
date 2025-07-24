@@ -1,5 +1,7 @@
 #include "Core.h"
 
+#include <pspaudio.h>
+#include <pspaudiolib.h>
 #include <pspctrl.h>
 #include <pspdisplay.h>
 #include <pspgu.h>
@@ -8,6 +10,7 @@
 #include <psprtc.h>
 #include <pspthreadman.h>
 
+#include "Audio/AudioThread.h"
 #include "Graphics/2d.h"
 #include "Graphics/Font.h"
 
@@ -107,6 +110,11 @@ void InitCore() {
     sceCtrlSetSamplingCycle(0);
     sceCtrlSetSamplingMode(PSP_CTRL_MODE_ANALOG);
 
+    // Setup audio
+    pspAudioInit();
+    pspAudioSetVolume(0, PSP_AUDIO_VOLUME_MAX/2, PSP_AUDIO_VOLUME_MAX/2);
+    pspAudioSetChannelCallback(0, AudioCallback, nullptr);
+
     // Setup rendering
     InitGu();
     End2D();
@@ -128,6 +136,8 @@ int ShouldClose() {
 void EndCore() {
     delete g_default_font;
     EndGu();
+    pspAudioSetChannelCallback(0, NULL, NULL);
+    pspAudioEnd();
 }
 
 
