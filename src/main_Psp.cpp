@@ -10,9 +10,7 @@
 #include "Beatmap/TaikoBeatmap/TaikoBeatmap.h"
 #include "BeatmapPlayer/BeatmapPlayerPsp.h"
 #include "Input/InputHandling.h"
-#include "Platform/Psp/Audio/AudioStream.h"
 #include "Platform/Psp/Audio/AudioStreamMP3.h"
-#include "Platform/Psp/Audio/AudioThread.h"
 #include "Ruleset/TaikoRuleset/TaikoRulesetPsp.h"
 
 PSP_MODULE_INFO("taco_test", 0, 1, 0);
@@ -29,7 +27,7 @@ int main() {
     InitCore();
     InitInputHandling();
 
-    OsuBeatmap *beatmap = OsuBeatmap::load("res/lagtrain.txt");
+    OsuBeatmap *beatmap = OsuBeatmap::load("res/maps/hito/sara_hito.txt");
     TaikoBeatmap *taiko_beatmap = TaikoBeatmap::FromOsuBeatmap(beatmap);
     delete beatmap;
 
@@ -54,13 +52,6 @@ int main() {
         char fps_buf[32];
         snprintf(fps_buf, 32, "FPS: %.0f", GetFPS());
         DrawText(fps_buf, g_default_font, {SCREEN_WIDTH-80, 2.f}, 0.f, 1, 0xFF00AA00);
-
-        AudioStream *audio = GetCurrentAudioStream();
-        if (audio) {
-            int sample_rate = audio->GetSampleRate();
-            sniprintf(fps_buf, 32, "sample rate: %dhz\n", sample_rate);
-            DrawText(fps_buf, g_default_font, {SCREEN_WIDTH-150, 22.f}, 0.f, 1, (sample_rate == 44100) ? 0xFF00AA00 : 0xFF0000AA);
-        }
 
         //SetLastFrameTimeToNow();
         EndFrame();

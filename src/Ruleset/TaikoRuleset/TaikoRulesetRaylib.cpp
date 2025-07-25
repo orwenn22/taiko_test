@@ -45,7 +45,6 @@ TaikoRulesetRaylib::~TaikoRulesetRaylib() {
 
 void TaikoRulesetRaylib::LoadResources() {
     TaikoRuleset::LoadResources();
-    m_audio = LoadMusicStream(TextFormat("res/%s", GetBeatmap<TaikoBeatmap>()->m_audio_filename));
 
     m_small_hit_texture = LoadTexture("res/skin/Taiko/taikohitcircle.png");
     m_small_hit_overlay_texture = LoadTexture("res/skin/Taiko/taikohitcircleoverlay.png");
@@ -60,6 +59,9 @@ void TaikoRulesetRaylib::LoadResources() {
     m_playfield_left_keys_textures[3] = LoadTexture("res/skin/Taiko/taikoside2.png");
 
     m_shader = LoadShader("res/shader/discard_transparent.vs", "res/shader/discard_transparent.fs");
+
+    auto beatmap = GetBeatmap<TaikoBeatmap>();
+    m_audio = LoadMusicStream(TextFormat("%s/%s", beatmap->GetRootPath(), beatmap->m_audio_filename));
 }
 
 void TaikoRulesetRaylib::StartAudio(float offset) {

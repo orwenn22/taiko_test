@@ -303,6 +303,12 @@ OsuBeatmap *OsuBeatmap::load(const char *path) {
     printf("%zu/%zu timing points (=%zu bytes)\n", beatmap->m_timing_point_parsed, beatmap->m_timing_point_count, sizeof(OsuTimingPoint) * beatmap->m_timing_point_count);
     printf("%zu/%zu hit objects (>%zu bytes)\n", beatmap->m_hit_object_parsed, beatmap->m_hit_object_count, sizeof(OsuHitObject) * beatmap->m_hit_object_count);
 
+    char real_path[1024];
+    realpath(path, real_path);
+    beatmap->SetRootPathFromFile(real_path);
+
+    printf("beatmap root: %s\n", beatmap->GetRootPath());
+
     return beatmap;
 }
 

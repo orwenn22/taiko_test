@@ -33,6 +33,8 @@ BeatmapPlayer::~BeatmapPlayer() {
 
 
 void BeatmapPlayer::HandleInput(const InputEvent &input) {
+    if (m_ruleset == nullptr) return;
+
     //Time of the previous frame
     int last_time_ms = (int)(m_time*1000.f);
 

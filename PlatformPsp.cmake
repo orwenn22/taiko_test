@@ -6,6 +6,8 @@ file(COPY res_psp/ DESTINATION res)
 add_executable(${PROJECT_NAME} src/main_Psp.cpp
         src/Utils.h
         src/Utils.cpp
+        src/Beatmap/Beatmap.cpp
+        src/Beatmap/Beatmap.h
         src/Beatmap/OsuBeatmap/OsuBeatmap.cpp
         src/Beatmap/OsuBeatmap/OsuBeatmap.h
         src/Beatmap/OsuBeatmap/OsuHitObject.cpp

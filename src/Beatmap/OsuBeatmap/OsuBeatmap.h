@@ -3,10 +3,12 @@
 
 #include <cstddef>
 
+#include "../Beatmap.h"
+
 struct OsuTimingPoint;
 struct OsuHitObject;
 
-class OsuBeatmap {
+class OsuBeatmap : public Beatmap {
 public:
     static OsuBeatmap *load(const char *path);
     ~OsuBeatmap();

@@ -42,15 +42,16 @@ void TaikoRulesetPsp::LoadResources() {
     m_taiko_sheet = Texture::Load("res/skin/Taiko/sheet.png");
     m_taiko_sheet->Swizzle();
 
-    char file_path_buf[64];
-    snprintf(file_path_buf, 64, "res/%s", GetBeatmap<TaikoBeatmap>()->m_audio_filename);
+    auto beatmap = GetBeatmap<TaikoBeatmap>();
+    char file_path_buf[256];
+    snprintf(file_path_buf, 64, "%s/%s", beatmap->GetRootPath(),beatmap->m_audio_filename);
     m_audio = AudioStream::InitStream(file_path_buf);
 }
 
 void TaikoRulesetPsp::StartAudio(float offset) {
     TaikoRuleset::StartAudio(offset);
+    m_audio->Seek(offset);
     SetCurrentAudioStream(m_audio);
-    //m_audio->Seek(offset); //FIXME: weird audio artefacts
 }
 
 void TaikoRulesetPsp::OnGameEnd() {
@@ -80,6 +81,9 @@ void TaikoRulesetPsp::Draw() {
     DrawPlayfield();
     DrawLeftPart();
     DrawReceptor();
+
+    sceGuClear(GU_DEPTH_BUFFER_BIT); //This makes it so the elements drawn past this point are always on top of the playfield
+
     DrawBarlines(current_time);
     DrawHits(current_time);
 
