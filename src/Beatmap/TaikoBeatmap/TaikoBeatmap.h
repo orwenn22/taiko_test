@@ -14,7 +14,8 @@ class OsuBeatmap;
 class TaikoBeatmap : public Beatmap {
 public:
     static TaikoBeatmap *FromOsuBeatmap(OsuBeatmap *osu_beatmap);
-    ~TaikoBeatmap();
+    static TaikoBeatmap *FromOsuBeatmapPath(const char *file_path);
+    ~TaikoBeatmap() override;
 
     TaikoTimingPoint *GetTimingPointForTime(int time);
     TaikoEffectPoint *GetEffectPointForTime(int time);

@@ -12,6 +12,7 @@ struct Texture;
 class TaikoRulesetPsp : public TaikoRuleset {
 public:
     TaikoRulesetPsp();
+    static TaikoRulesetPsp *build();
     ~TaikoRulesetPsp() override;
 
     void LoadResources() override;

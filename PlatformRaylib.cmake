@@ -43,6 +43,16 @@ add_executable(${PROJECT_NAME} src/main.cpp
         src/Platform/Raylib/UtilsRaylib.cpp
         src/Platform/Raylib/UtilsRaylib.h
         src/BeatmapPlayer/BeatmapPlayerRaylib.cpp
-        src/BeatmapPlayer/BeatmapPlayerRaylib.h)
+        src/BeatmapPlayer/BeatmapPlayerRaylib.h
+        src/SceneManagement/SceneManager.cpp
+        src/SceneManagement/SceneManager.h
+        src/SceneManagement/Scene.cpp
+        src/SceneManagement/Scene.h
+        src/MapIndex/MapIndexFile.cpp
+        src/MapIndex/MapIndexFile.h
+        src/Registry/FileFormat/FileFormatEntry.h
+        src/Registry/FileFormat/FileFormatRegistry_raylib.cpp
+        src/Registry/FileFormat/FileFormatRegistry.h
+        src/Registry/FileFormat/FileFormatRegistry.cpp)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE raylib)

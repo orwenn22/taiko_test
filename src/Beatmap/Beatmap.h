@@ -6,7 +6,7 @@
 class Beatmap {
 public:
     Beatmap();
-    ~Beatmap();
+    virtual ~Beatmap();
 
     //The root path should be used to load resources bundled with the map (song, images (?), etc)
     const char *GetRootPath();

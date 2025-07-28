@@ -11,10 +11,13 @@
 #include "BeatmapPlayer/BeatmapPlayerPsp.h"
 #include "Input/InputHandling.h"
 #include "Platform/Psp/Audio/AudioStreamMP3.h"
+#include "Registry/FileFormat/FileFormatRegistry.h"
 #include "Ruleset/TaikoRuleset/TaikoRulesetPsp.h"
+#include "SceneManagement/SceneManager.h"
 
 PSP_MODULE_INFO("taco_test", 0, 1, 0);
 PSP_MAIN_THREAD_ATTR(THREAD_ATTR_VFPU | THREAD_ATTR_USER);
+
 
 //TODO: move this somewhere else
 void clearBackground(unsigned int color) {
@@ -23,31 +26,37 @@ void clearBackground(unsigned int color) {
     sceGuClear(GU_COLOR_BUFFER_BIT | GU_DEPTH_BUFFER_BIT);
 }
 
-int main() {
+
+int main(int argc, const char *argv[]) {
     InitCore();
     InitInputHandling();
 
-    OsuBeatmap *beatmap = OsuBeatmap::load("res/maps/hito/sara_hito.txt");
-    TaikoBeatmap *taiko_beatmap = TaikoBeatmap::FromOsuBeatmap(beatmap);
-    delete beatmap;
-
-    BeatmapPlayerPsp *beatmap_player = new BeatmapPlayerPsp(new TaikoRulesetPsp, taiko_beatmap);
+    //this is to demonstrate how to lead a beatmap using the file format registry thing,
+    //might need some cleanup in the future, but at least this is format/ruleset independent
+    Scene *scene = nullptr;
+    Beatmap *beatmap = nullptr;
+    const FileFormatEntry *file_format = MatchFileFormatFromFilename("res/maps/null_spec/null_spec.osu", &beatmap);
+    if (file_format != nullptr && beatmap != nullptr) {
+        Ruleset *ruleset = file_format->make_ruleset();
+        scene = new BeatmapPlayerPsp(ruleset, beatmap);
+    }
+    SceneManager *scene_manager = new SceneManager(scene);
 
     std::queue<InputEvent> input_queue;
     while (ShouldClose()) {
         PollInputEvents(input_queue);
         while (!input_queue.empty()) {
-            beatmap_player->HandleInput(input_queue.front());
+            scene_manager->HandleInput(input_queue.front());
             input_queue.pop();
         }
 
-        beatmap_player->Update(GetDeltaTime());
+        scene_manager->Update(GetDeltaTime());
 
         StartFrame();
 
         clearBackground(0xFF000000);
 
-        beatmap_player->Draw();
+        scene_manager->Draw();
 
         char fps_buf[32];
         snprintf(fps_buf, 32, "FPS: %.0f", GetFPS());
@@ -57,8 +66,7 @@ int main() {
         EndFrame();
     }
 
-    delete beatmap_player;
-
+    delete scene_manager;
     CloseInputHandling();
     EndCore();
     return 0;

@@ -137,9 +137,22 @@ TaikoBeatmap *TaikoBeatmap::FromOsuBeatmap(OsuBeatmap *osu_beatmap) {
     return taiko_beatmap;
 }
 
+TaikoBeatmap *TaikoBeatmap::FromOsuBeatmapPath(const char *file_path) {
+    if (file_path == nullptr) return nullptr;
+    OsuBeatmap *osu_beatmap = OsuBeatmap::load(file_path);
+    if (osu_beatmap == nullptr) return nullptr;
+    TaikoBeatmap *taiko_beatmap = FromOsuBeatmap(osu_beatmap);
+    delete osu_beatmap;
+    return taiko_beatmap;
+}
+
+
 TaikoBeatmap::TaikoBeatmap(): m_audio_filename{} {
     m_hits = nullptr;
     m_hit_count = 0;
+
+    m_drum_rolls = nullptr;
+    m_drum_roll_count = 0;
 
     m_effect_points = nullptr;
     m_effect_point_count = 0;

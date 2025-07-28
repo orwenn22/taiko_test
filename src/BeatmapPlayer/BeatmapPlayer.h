@@ -3,19 +3,19 @@
 
 #include "../Input/InputHandling.h"
 #include "../Ruleset/Ruleset.h"
+#include "../SceneManagement/Scene.h"
 
 
 class Beatmap;
 class Ruleset;
 
-class BeatmapPlayer {
+class BeatmapPlayer : public Scene {
 public:
     BeatmapPlayer(Ruleset *ruleset, Beatmap *beatmap);
-    virtual ~BeatmapPlayer();
+    ~BeatmapPlayer() override;
 
-    void HandleInput(const InputEvent &input);
-    void Update(float dt);
-    virtual void Draw() = 0;
+    void HandleInput(const InputEvent &input) override;
+    void Update(float dt) override;
 
     float GetTime() { return m_time; }
 

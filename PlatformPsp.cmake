@@ -58,7 +58,17 @@ add_executable(${PROJECT_NAME} src/main_Psp.cpp
         src/Platform/Psp/Audio/AudioStreamOGG.cpp
         src/Platform/Psp/Audio/AudioStreamOGG.h
         src/Platform/Psp/Audio/resample.cpp
-        src/Platform/Psp/Audio/resample.h)
+        src/Platform/Psp/Audio/resample.h
+        src/SceneManagement/SceneManager.cpp
+        src/SceneManagement/SceneManager.h
+        src/SceneManagement/Scene.cpp
+        src/SceneManagement/Scene.h
+        src/MapIndex/MapIndexFile.cpp
+        src/MapIndex/MapIndexFile.h
+        src/Registry/FileFormat/FileFormatEntry.h
+        src/Registry/FileFormat/FileFormatRegistry.h
+        src/Registry/FileFormat/FileFormatRegistry.cpp
+        src/Registry/FileFormat/FileFormatRegistry_psp.cpp)
 
 # TODO: remove all the unnecessary stuff
 target_link_libraries(${PROJECT_NAME} PRIVATE

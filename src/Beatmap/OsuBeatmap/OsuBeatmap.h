@@ -11,7 +11,7 @@ struct OsuHitObject;
 class OsuBeatmap : public Beatmap {
 public:
     static OsuBeatmap *load(const char *path);
-    ~OsuBeatmap();
+    ~OsuBeatmap() override;
 
     //[General]
     char m_audio_filename[32];

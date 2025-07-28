@@ -65,3 +65,27 @@ int CountCharUntil(const char *str, char c, size_t start_location, char stop_cha
 
     return count;
 }
+
+void RemoveNewline(char *str) {
+    if (str == nullptr) return;
+
+    size_t len = strlen(str);
+    while (len > 0 && (str[len - 1] == '\n' || str[len - 1] == '\r')) {
+        str[len - 1] = 0;
+        --len;
+    }
+}
+
+
+bool EndsWith(const char *str, const char *suffix) {
+    if (str == nullptr || suffix == nullptr) return false;
+    size_t len = strlen(str);
+    size_t suffix_len = strlen(suffix);
+    if (len < suffix_len) return false;
+
+    for (int i = 0; i < suffix_len; ++i) {
+        if (str[len-1 - i] != suffix[suffix_len-1 - i]) return false;
+    }
+
+    return true;
+}

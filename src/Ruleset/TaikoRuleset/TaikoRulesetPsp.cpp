@@ -29,8 +29,10 @@ static RulesetInput s_taiko_inputs_psp[] = {
 };
 static const int s_taiko_input_count = sizeof(s_taiko_inputs_psp) / sizeof(RulesetInput);
 
-TaikoRulesetPsp::TaikoRulesetPsp() : TaikoRuleset(s_taiko_inputs_psp, s_taiko_input_count), m_taiko_sheet(nullptr), m_keys_opacity{} {
+TaikoRulesetPsp::TaikoRulesetPsp() : TaikoRuleset(s_taiko_inputs_psp, s_taiko_input_count), m_taiko_sheet(nullptr), m_keys_opacity{}, m_audio(nullptr) {
 }
+
+TaikoRulesetPsp * TaikoRulesetPsp::build() { return new TaikoRulesetPsp(); }
 
 TaikoRulesetPsp::~TaikoRulesetPsp() {
     delete m_taiko_sheet;

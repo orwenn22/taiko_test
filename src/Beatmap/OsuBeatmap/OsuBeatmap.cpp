@@ -239,7 +239,7 @@ static size_t CountElementsInSection(FILE *in_file) {
 
     char line[1024] = {0};
     while (fgets(line, 1024, in_file) != nullptr) {
-        if (line[0] == '\n') continue;
+        if (line[0] == '\n' || (line[0] == '\r' && line[1] == '\n')) continue;
         if (line[0] == '[') break;
         ++hit_object_count;
     }
@@ -259,10 +259,9 @@ OsuBeatmap *OsuBeatmap::load(const char *path) {
 
     char line[1024] = {0};
     while (fgets(line, 1024, in_file) != nullptr) {
-        if (line[0] == '\n') continue;
+        if (line[0] == '\n' || (line[0] == '\r' && line[1] == '\n')) continue;
 
-        size_t len = strlen(line);
-        if (len > 0 && line[len-1] == '\n') line[len-1] = '\0';
+        RemoveNewline(line);
 
         if (line[0] == '[') {
             if (strcmp(line, "[General]") == 0) current_section = General;

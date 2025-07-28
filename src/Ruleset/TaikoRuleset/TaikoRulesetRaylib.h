@@ -12,6 +12,7 @@ struct TaikoHit;
 class TaikoRulesetRaylib : public TaikoRuleset {
 public:
     TaikoRulesetRaylib();
+    static TaikoRulesetRaylib *build();
     ~TaikoRulesetRaylib() override;
 
     void LoadResources() override;

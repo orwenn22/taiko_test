@@ -30,6 +30,8 @@ TaikoRulesetRaylib::TaikoRulesetRaylib()
     UpdatePlayfieldGeometry();
 }
 
+TaikoRulesetRaylib * TaikoRulesetRaylib::build() { return new TaikoRulesetRaylib(); }
+
 TaikoRulesetRaylib::~TaikoRulesetRaylib() {
     UnloadTexture(m_small_hit_texture);
     UnloadTexture(m_small_hit_overlay_texture);
