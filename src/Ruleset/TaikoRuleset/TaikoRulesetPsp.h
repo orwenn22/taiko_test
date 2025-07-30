@@ -6,6 +6,7 @@
 #include "../../Platform/Psp/Graphics/Vertex.h"
 #include "../../Platform/Psp/Audio/AudioStream.h"
 
+struct TaikoDrumRoll;
 struct TaikoHit;
 struct Texture;
 
@@ -33,6 +34,10 @@ private:
 
     void DrawHits(int current_time);
     bool GetHitVertices(int current_time, TaikoHit *taiko_hit, Vertex_UV32_Color32_XYZ32 *vertices_out, uint8_t *indices_out);
+
+    //16 vertices and 24 indices per drum roll
+    void DrawDrumRolls(int current_time);
+    bool GetDrumRollVertices(int current_time, TaikoDrumRoll *drum_roll, Vertex_UV32_Color32_XYZ32 *vertices_out, uint8_t *indices_out);
 
     Texture *m_taiko_sheet;
     AudioStream *m_audio;
