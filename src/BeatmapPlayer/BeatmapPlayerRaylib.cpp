@@ -4,15 +4,31 @@
 
 #include <raylib.h>
 
+#include "../Beatmap/Beatmap.h"
 
-BeatmapPlayerRaylib::BeatmapPlayerRaylib(Ruleset *ruleset, Beatmap *beatmap) : BeatmapPlayer(ruleset, beatmap) {
+
+BeatmapPlayerRaylib::BeatmapPlayerRaylib(Ruleset *ruleset, Beatmap *beatmap) : BeatmapPlayer(ruleset, beatmap), m_background{} {
+    //TODO: MOVE THIS SOMEWHERE ELSE
+    //      as of right now it's not possible to create a BeatmapPlayerRaylib before initialising raylib because of this
+    if (m_beatmap != nullptr && m_beatmap->GetRootPath() && m_beatmap->GetBackground() != nullptr) {
+        m_background = LoadTexture(TextFormat("%s/%s", m_beatmap->GetRootPath(), m_beatmap->GetBackground()));
+    }
 }
 
-BeatmapPlayerRaylib::~BeatmapPlayerRaylib() = default;
+BeatmapPlayerRaylib::~BeatmapPlayerRaylib() {
+    UnloadTexture(m_background);
+}
 
 
 void BeatmapPlayerRaylib::Draw() {
     if (m_ruleset == nullptr) return;
+
+    if (m_background.id > 0) {
+        DrawTexturePro(m_background, {0, 0, (float)m_background.width, (float)m_background.height},
+            {0, 0, (float)GetScreenWidth(), (float)GetScreenHeight()},
+            {0, 0}, 0,
+            {70, 70, 70, 255});
+    }
 
     m_ruleset->Draw();
 
@@ -37,6 +53,9 @@ void BeatmapPlayerRaylib::Draw() {
     DrawText("Time", 10, y, 20, WHITE);
     DrawText(TextFormat("%.2f (Over: %d)", m_time, m_ruleset->IsOver()), 145, y, 20, WHITE);
     y += 20;
+
+    DrawText("BG", 10, y, 20, WHITE);
+    DrawText(TextFormat("%s", m_beatmap->GetBackground()), 145, y, 20, WHITE);
 
     if (m_have_hit_difference) {
         DrawText(TextFormat("%d ms", m_latest_hit_difference), 10, 340, 20, YELLOW);

@@ -134,6 +134,8 @@ TaikoBeatmap *TaikoBeatmap::FromOsuBeatmap(OsuBeatmap *osu_beatmap) {
     printf("TaikoBeatmap::FromOsuBeatmap() : converted timing points: %zu/%zu\n", converted_timing_points, taiko_beatmap->m_timing_point_count);
 
     taiko_beatmap->SetRootPath(osu_beatmap->GetRootPath());
+    taiko_beatmap->SetBackground(osu_beatmap->GetBackground());
+
     return taiko_beatmap;
 }
 

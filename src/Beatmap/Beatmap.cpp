@@ -1,13 +1,16 @@
 #include "Beatmap.h"
 
 #include <cstdlib>
-#include <string.h>
+#include <cstring>
 
-Beatmap::Beatmap() : m_root_path(nullptr) {}
+Beatmap::Beatmap() : m_root_path(nullptr), m_background_path(nullptr) {}
 
 Beatmap::~Beatmap() {
     if (m_root_path) free(m_root_path);
     m_root_path = nullptr;
+
+    if (m_background_path) free(m_background_path);
+    m_background_path = nullptr;
 }
 
 const char *Beatmap::GetRootPath() {
@@ -40,4 +43,15 @@ void Beatmap::SetRootPathFromFile(const char *file_path) {
     m_root_path = (char *) malloc(sizeof(char) * (last_slash + 2));
     strncpy(m_root_path, file_path, last_slash + 1);
     m_root_path[last_slash + 1] = 0; //null termination
+}
+
+
+void Beatmap::SetBackground(const char *background_path) {
+    if (background_path == nullptr) return;
+    if (m_background_path != nullptr) free(m_background_path);
+    m_background_path = strdup(background_path);
+}
+
+const char *Beatmap::GetBackground() {
+    return m_background_path;
 }

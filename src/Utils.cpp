@@ -52,6 +52,28 @@ float ParseFloat(const char *str, size_t *location) {
 }
 
 
+char *ParseStrOsu(const char *str, size_t *location) {
+    if (str == nullptr || location == nullptr) return nullptr;
+
+    bool between_quotes = (str[*location] == '"');
+
+    size_t start_location = *location + (size_t) between_quotes; //skip first quote if necessary
+    size_t end_location = start_location;
+    char stop_char = between_quotes ? '"' : ',';
+
+    while (str[end_location] != stop_char && str[end_location] != 0) ++end_location;
+    if (between_quotes && str[end_location] == 0) return nullptr;  //didn't find a second double quote  TODO: better handle that case? return the string anyway?
+
+    size_t length = end_location - start_location + 1; //+1 for null char
+    char *result = (char *) malloc(sizeof(char) * (length));
+    for (size_t i = start_location; i < end_location; ++i) result[i - start_location] = str[i];
+    result[length-1] = 0;
+
+    *location = end_location + (size_t) between_quotes; //skip last quote if necessary
+    return result;
+}
+
+
 int CountCharUntil(const char *str, char c, size_t start_location, char stop_char) {
     if (str == nullptr) return 0;
     size_t len = strlen(str);

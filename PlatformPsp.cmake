@@ -68,7 +68,9 @@ add_executable(${PROJECT_NAME} src/main_Psp.cpp
         src/Registry/FileFormat/FileFormatEntry.h
         src/Registry/FileFormat/FileFormatRegistry.h
         src/Registry/FileFormat/FileFormatRegistry.cpp
-        src/Registry/FileFormat/FileFormatRegistry_psp.cpp)
+        src/Registry/FileFormat/FileFormatRegistry_psp.cpp
+        src/Beatmap/OsuBeatmap/OsuBeatmapParsing.cpp
+)
 
 # TODO: remove all the unnecessary stuff
 target_link_libraries(${PROJECT_NAME} PRIVATE

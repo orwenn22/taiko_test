@@ -10,7 +10,7 @@ struct OsuHitObject;
 
 class OsuBeatmap : public Beatmap {
 public:
-    static OsuBeatmap *load(const char *path);
+    static OsuBeatmap *load(const char *path); //impl in OsuBeatmapParsing.cpp
     ~OsuBeatmap() override;
 
     //[General]

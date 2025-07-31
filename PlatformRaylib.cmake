@@ -53,6 +53,8 @@ add_executable(${PROJECT_NAME} src/main.cpp
         src/Registry/FileFormat/FileFormatEntry.h
         src/Registry/FileFormat/FileFormatRegistry_raylib.cpp
         src/Registry/FileFormat/FileFormatRegistry.h
-        src/Registry/FileFormat/FileFormatRegistry.cpp)
+        src/Registry/FileFormat/FileFormatRegistry.cpp
+        src/Beatmap/OsuBeatmap/OsuBeatmapParsing.cpp
+)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE raylib)

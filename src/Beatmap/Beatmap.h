@@ -13,8 +13,12 @@ public:
     void SetRootPath(const char *path);
     void SetRootPathFromFile(const char *file_path); //this basically strips whatever is after the last '/' of the path
 
+    void SetBackground(const char *background_path); //background_path relative to root path
+    const char *GetBackground();
+
 private:
-    char *m_root_path;
+    char *m_root_path; //heap allocated
+    char *m_background_path; //heap allocated, this is relative to the root path
 };
 
 

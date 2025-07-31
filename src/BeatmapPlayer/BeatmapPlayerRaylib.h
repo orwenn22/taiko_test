@@ -2,6 +2,7 @@
 #define BEATMAPPLAYERRAYLIB_H
 #include "BeatmapPlayer.h"
 
+#include <raylib.h>
 
 class BeatmapPlayerRaylib : public BeatmapPlayer {
 public:
@@ -9,6 +10,10 @@ public:
     ~BeatmapPlayerRaylib() override;
 
     void Draw() override;
+
+
+private:
+    Texture m_background;
 };
 
 
