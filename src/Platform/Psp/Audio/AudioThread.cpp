@@ -7,11 +7,13 @@
 #define TEMP_BUFFER_SAMPLES 4096 // stereo samples (2048 frames)
 static short temp_decode_buffer[TEMP_BUFFER_SAMPLES]; // holds raw decoded samples before resampling them
 
+//TODO: if there are weird audio bugs in the future, make this volatile and manually cast it everywhere to AudioStream *
+//      or use a mutex? might be overkill idk
 static AudioStream *s_current_stream = nullptr;
 
 
 void AudioCallback(void* buf, unsigned int length, void *userdata) {
-    if (s_current_stream == nullptr) return;
+    if (s_current_stream == nullptr || s_current_stream->IsPaused()) return;
 
     int source_sample_rate = s_current_stream->GetSampleRate();
     short *out = (short *)buf; //anything we put here will be played

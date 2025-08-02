@@ -6,6 +6,9 @@
 #include "AudioStreamOGG.h"
 #include "AudioThread.h"
 
+AudioStream::AudioStream() : m_paused(false) {
+}
+
 AudioStream::~AudioStream() {
     if (GetCurrentAudioStream() == this) SetCurrentAudioStream(nullptr);
 }

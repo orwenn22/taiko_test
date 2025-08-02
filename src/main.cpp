@@ -50,7 +50,7 @@ int main(int argc, const char *argv[]) {
 
     InitInputHandling();
 
-    //this is to demonstrate how to lead a beatmap using the file format registry thing,
+    //this is to demonstrate how to load a beatmap using the file format registry thing,
     //might need some cleanup in the future, but at least this is format/ruleset independent
     Scene *scene = nullptr;
     Beatmap *beatmap = nullptr;

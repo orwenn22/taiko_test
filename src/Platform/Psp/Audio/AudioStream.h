@@ -5,6 +5,7 @@
 
 class AudioStream {
 public:
+    AudioStream();
     virtual ~AudioStream();
 
     virtual int Decode(short *output, int frames) = 0;
@@ -12,7 +13,12 @@ public:
     virtual float GetDuration() = 0;
     virtual int GetSampleRate() = 0;
 
+    bool IsPaused() const volatile { return m_paused; }
+
     static AudioStream *InitStream(const char *name);
+
+protected:
+    volatile bool m_paused;
 };
 
 

@@ -29,15 +29,15 @@ int AudioStreamMP3::Decode(short *output, int frames) {
 }
 
 int AudioStreamMP3::Seek(float seconds) {
+    m_paused = true; //pausing prevent artefacts from being heard while seeking
+
     if (seconds < 0.f) seconds = 0.f;
     else if (seconds >= GetDuration()) seconds = 0.f; //go back to the start for now? idk
 
     uint64_t sample_offset = (uint64_t)(seconds * m_mp3.info.hz);
-    if (mp3dec_ex_seek(&m_mp3, sample_offset) != 0) return 0;
-
-    //FIXME: seeking creates weird audio artefacts
-
-    return 1; //success
+    int result = (mp3dec_ex_seek(&m_mp3, sample_offset) == 0);
+    m_paused = false;
+    return result;
 }
 
 float AudioStreamMP3::GetDuration() {

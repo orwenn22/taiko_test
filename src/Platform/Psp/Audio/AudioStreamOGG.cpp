@@ -39,14 +39,14 @@ int AudioStreamOGG::Decode(short *output, int frames) {
 }
 
 int AudioStreamOGG::Seek(float seconds) {
+    m_paused = true; //pausing prevent artefacts from being heard while seeking
+
     if (seconds < 0.f) seconds = 0.f;
-
     int target_frame = (int)(seconds * (float) m_ogg->sample_rate);
-    if (!stb_vorbis_seek_frame(m_ogg, target_frame)) return 0;
 
-    //FIXME: seeking creates weird audio artefacts
-
-    return 1;
+    int result = !stb_vorbis_seek_frame(m_ogg, target_frame);
+    m_paused = false;
+    return result ? 0 : 1;
 }
 
 float AudioStreamOGG::GetDuration() {
