@@ -8,10 +8,9 @@
 #include "Input/InputHandling.h"
 #include "raylib.h"
 #include "Time.h"
-#include "Beatmap/TaikoBeatmap/TaikoBeatmap.h"
+#include "BeatmapPlayer/BeatmapLoader.h"
 #include "BeatmapPlayer/BeatmapPlayerRaylib.h"
 #include "MapIndex/MapIndexFile.h"
-#include "Registry/FileFormat/FileFormatRegistry.h"
 #include "SceneManagement/SceneManager.h"
 
 std::atomic<bool> g_running = true;
@@ -50,16 +49,8 @@ int main(int argc, const char *argv[]) {
 
     InitInputHandling();
 
-    //this is to demonstrate how to load a beatmap using the file format registry thing,
-    //might need some cleanup in the future, but at least this is format/ruleset independent
-    Scene *scene = nullptr;
-    Beatmap *beatmap = nullptr;
-    const FileFormatEntry *file_format = MatchFileFormatFromFilename("res/maps/null_spec/null_spec.osu", &beatmap);
-    if (file_format != nullptr && beatmap != nullptr) {
-        Ruleset *ruleset = file_format->make_ruleset();
-        scene = new BeatmapPlayerRaylib(ruleset, beatmap);
-    }
-    SceneManager *scene_manager = new SceneManager(scene);
+    //NOTE: this assumes that the map file exists
+    SceneManager *scene_manager = new SceneManager(BeatmapLoader::LoadFromFile<BeatmapPlayerRaylib>("res/maps/null_spec/null_spec.osu"));
 
     while (!WindowShouldClose() && g_running.load()) {
         //Get inputs

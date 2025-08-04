@@ -53,8 +53,14 @@ public:
     Ruleset(RulesetRating *ratings = default_ruleset_rating, int rating_count = 2, RulesetInput *inputs = nullptr, int input_count = 0);
     virtual ~Ruleset();
 
-    //Called when after the beatmap is loaded
-    virtual void LoadResources();
+    //Called by BeatmapPlayer::LoadResources(), will call LoadResourcesInternal()
+    //returns false if a critical resources failed to load
+    bool LoadResources();
+
+    //Does nothing by default, but subclasses should overwrite this to load ruleset-related resources (such as the skin
+    //or the map's audio file)
+    //Called by Ruleset::LoadResources(), returns false if a critical resources failed to load
+    virtual bool LoadResourcesInternal();
 
     //Called when the game is starting
     virtual void OnGameStart();
@@ -90,6 +96,8 @@ public:
 
 private:
     friend BeatmapPlayer;
+
+    bool m_resources_loaded;
 
     Beatmap *m_beatmap;
     BeatmapPlayer *m_player;

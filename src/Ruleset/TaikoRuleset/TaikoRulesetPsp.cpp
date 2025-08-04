@@ -40,15 +40,20 @@ TaikoRulesetPsp::~TaikoRulesetPsp() {
     delete m_audio;
 }
 
-void TaikoRulesetPsp::LoadResources() {
-    TaikoRuleset::LoadResources();
+bool TaikoRulesetPsp::LoadResourcesInternal() {
+    if (!TaikoRuleset::LoadResourcesInternal()) return false;
+
     m_taiko_sheet = Texture::Load("res/skin/Taiko/sheet.png");
+    if (m_taiko_sheet == nullptr) return false;
     m_taiko_sheet->Swizzle();
 
     auto beatmap = GetBeatmap<TaikoBeatmap>();
     char file_path_buf[256];
     snprintf(file_path_buf, 64, "%s/%s", beatmap->GetRootPath(),beatmap->m_audio_filename);
     m_audio = AudioStream::InitStream(file_path_buf);
+    //if (m_audio == nullptr) return false; //the ruleset is playable without audio, so let's not return false for this
+
+    return true;
 }
 
 void TaikoRulesetPsp::StartAudio(float offset) {

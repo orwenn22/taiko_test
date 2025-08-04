@@ -30,13 +30,12 @@ TaikoRuleset::TaikoRuleset(RulesetInput *inputs, int input_count)
     ComputeHitWindows();
 }
 
-TaikoRuleset::~TaikoRuleset() {
+TaikoRuleset::~TaikoRuleset() = default;
 
-}
-
-void TaikoRuleset::LoadResources() {
-    Ruleset::LoadResources();
+bool TaikoRuleset::LoadResourcesInternal() {
+    if (!Ruleset::LoadResourcesInternal()) return false;
     ComputeHitWindows();
+    return true;
 }
 
 void TaikoRuleset::OnGameStart() {

@@ -55,6 +55,8 @@ add_executable(${PROJECT_NAME} src/main.cpp
         src/Registry/FileFormat/FileFormatRegistry.h
         src/Registry/FileFormat/FileFormatRegistry.cpp
         src/Beatmap/OsuBeatmap/OsuBeatmapParsing.cpp
+        src/BeatmapPlayer/BeatmapLoader.cpp
+        src/BeatmapPlayer/BeatmapLoader.h
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE raylib)

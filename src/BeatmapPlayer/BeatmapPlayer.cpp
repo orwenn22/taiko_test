@@ -8,7 +8,7 @@
 
 
 BeatmapPlayer::BeatmapPlayer(Ruleset *ruleset, Beatmap *beatmap)
-    : m_ruleset(ruleset), m_beatmap(beatmap),
+    : m_ruleset(ruleset), m_beatmap(beatmap), m_resources_loaded(false),
       m_time(-2.f), m_judgements(nullptr), m_max_rating(0), m_current_rating(0), m_bonus_rating(0),
       m_combo(0), m_max_combo(0), m_health(100.f),
       m_music_started(false) {
@@ -20,15 +20,38 @@ BeatmapPlayer::BeatmapPlayer(Ruleset *ruleset, Beatmap *beatmap)
 
     m_judgements = (int *) malloc(sizeof(int) * m_ruleset->m_rating_count);
     for (int i = 0; i < m_ruleset->m_rating_count; ++i) m_judgements[i] = 0;
-
-    m_ruleset->LoadResources();
-    m_ruleset->OnGameStart();
 }
 
 BeatmapPlayer::~BeatmapPlayer() {
-    free(m_judgements);
+    if (m_judgements) {
+        free(m_judgements);
+        m_judgements = nullptr;
+    }
+
     delete m_beatmap;
+    m_beatmap = nullptr;
+
     delete m_ruleset;
+    m_ruleset = nullptr;
+}
+
+
+bool BeatmapPlayer::LoadResourcesInternal() {
+    return true;
+}
+
+void BeatmapPlayer::OnGameStart() {
+    if (m_ruleset) m_ruleset->OnGameStart();
+}
+
+bool BeatmapPlayer::LoadResources() {
+    if (m_resources_loaded) return true;
+
+    if (!LoadResourcesInternal()) return false;
+    if (!m_ruleset->LoadResourcesInternal()) return false;
+
+    m_resources_loaded = true;
+    return true;
 }
 
 

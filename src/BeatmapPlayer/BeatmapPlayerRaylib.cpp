@@ -1,5 +1,7 @@
 #include "BeatmapPlayerRaylib.h"
 
+#include <cstdio>
+
 #include "../Platform/Raylib/UtilsRaylib.h"
 
 #include <raylib.h>
@@ -8,15 +10,20 @@
 
 
 BeatmapPlayerRaylib::BeatmapPlayerRaylib(Ruleset *ruleset, Beatmap *beatmap) : BeatmapPlayer(ruleset, beatmap), m_background{} {
-    //TODO: MOVE THIS SOMEWHERE ELSE
-    //      as of right now it's not possible to create a BeatmapPlayerRaylib before initialising raylib because of this
-    if (m_beatmap != nullptr && m_beatmap->GetRootPath() && m_beatmap->GetBackground() != nullptr) {
-        m_background = LoadTexture(TextFormat("%s/%s", m_beatmap->GetRootPath(), m_beatmap->GetBackground()));
-    }
 }
 
 BeatmapPlayerRaylib::~BeatmapPlayerRaylib() {
     UnloadTexture(m_background);
+}
+
+bool BeatmapPlayerRaylib::LoadResourcesInternal() {
+    if (!BeatmapPlayer::LoadResourcesInternal()) return false;
+
+    if (m_beatmap != nullptr && m_beatmap->GetRootPath() && m_beatmap->GetBackground() != nullptr) {
+        m_background = LoadTexture(TextFormat("%s/%s", m_beatmap->GetRootPath(), m_beatmap->GetBackground()));
+    }
+
+    return true;
 }
 
 

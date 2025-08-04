@@ -6,13 +6,10 @@
 #include "Platform/Psp/Core.h"
 #include "Platform/Psp/Graphics/2d.h"
 
-#include "Beatmap/OsuBeatmap/OsuBeatmap.h"
-#include "Beatmap/TaikoBeatmap/TaikoBeatmap.h"
+#include "BeatmapPlayer/BeatmapLoader.h"
 #include "BeatmapPlayer/BeatmapPlayerPsp.h"
 #include "Input/InputHandling.h"
 #include "Platform/Psp/Audio/AudioStreamMP3.h"
-#include "Registry/FileFormat/FileFormatRegistry.h"
-#include "Ruleset/TaikoRuleset/TaikoRulesetPsp.h"
 #include "SceneManagement/SceneManager.h"
 
 PSP_MODULE_INFO("taco_test", 0, 1, 0);
@@ -31,16 +28,8 @@ int main(int argc, const char *argv[]) {
     InitCore();
     InitInputHandling();
 
-    //this is to demonstrate how to load a beatmap using the file format registry thing,
-    //might need some cleanup in the future, but at least this is format/ruleset independent
-    Scene *scene = nullptr;
-    Beatmap *beatmap = nullptr;
-    const FileFormatEntry *file_format = MatchFileFormatFromFilename("res/maps/null_spec/null_spec.osu", &beatmap);
-    if (file_format != nullptr && beatmap != nullptr) {
-        Ruleset *ruleset = file_format->make_ruleset();
-        scene = new BeatmapPlayerPsp(ruleset, beatmap);
-    }
-    SceneManager *scene_manager = new SceneManager(scene);
+    //NOTE: this assumes that the map file exists
+    SceneManager *scene_manager = new SceneManager(BeatmapLoader::LoadFromFile<BeatmapPlayerPsp>("res/maps/null_spec/null_spec.osu"));
 
     std::queue<InputEvent> input_queue;
     while (ShouldClose()) {

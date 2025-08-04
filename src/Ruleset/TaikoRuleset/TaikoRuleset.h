@@ -18,7 +18,7 @@ public:
     TaikoRuleset(RulesetInput *inputs, int input_count);
     ~TaikoRuleset() override;
 
-    void LoadResources() override;
+    bool LoadResourcesInternal() override;
     void OnGameStart() override;
     bool IsOver() override;
     void OnGameEnd() override;

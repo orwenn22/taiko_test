@@ -70,6 +70,8 @@ add_executable(${PROJECT_NAME} src/main_Psp.cpp
         src/Registry/FileFormat/FileFormatRegistry.cpp
         src/Registry/FileFormat/FileFormatRegistry_psp.cpp
         src/Beatmap/OsuBeatmap/OsuBeatmapParsing.cpp
+        src/BeatmapPlayer/BeatmapLoader.cpp
+        src/BeatmapPlayer/BeatmapLoader.h
 )
 
 # TODO: remove all the unnecessary stuff

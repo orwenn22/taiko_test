@@ -9,6 +9,7 @@ public:
     BeatmapPlayerRaylib(Ruleset *ruleset, Beatmap *beatmap);
     ~BeatmapPlayerRaylib() override;
 
+    bool LoadResourcesInternal() override;
     void Draw() override;
 
 

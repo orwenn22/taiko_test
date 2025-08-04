@@ -14,6 +14,23 @@ public:
     BeatmapPlayer(Ruleset *ruleset, Beatmap *beatmap);
     ~BeatmapPlayer() override;
 
+    //This will load the resources of the beatmap player AND the ruleset, returns false if a critical resource failed to load
+    //(aka, this will call LoadResourcesInternal() and m_ruleset->LoadResources())
+    //should return false if a critical resource failed to load
+    bool LoadResources();
+
+    //Called by BeatmapPlayer::LoadResources(), should be called before OnGameStart()
+    //This does nothing by default, but subclasses should overwrite this to load stuff from the beatmap (such as the
+    //background image)
+    //In the future it would be cool to have some kind of "PrePlayer" scene that would load in another thread all the
+    //resources (both for the player and the ruleset)
+    //should return false if a critical resource failed to load
+    virtual bool LoadResourcesInternal();
+
+    //Just calls ruleset->OnGameStart();
+    //It should be called after LoadResources() and before the first time Update()/Draw()
+    void OnGameStart();
+
     void HandleInput(const InputEvent &input) override;
     void Update(float dt) override;
 
@@ -32,6 +49,7 @@ public:
 protected:
     Ruleset *m_ruleset;
     Beatmap *m_beatmap;
+    bool m_resources_loaded;
 
     //Time since start of beatmap (in seconds)
     float m_time;
