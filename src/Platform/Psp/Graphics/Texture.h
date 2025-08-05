@@ -12,13 +12,14 @@ enum TextureDataStatus {
     STATUS_MALLOC_MANAGED,
 };
 
-// TODO : keep track of color format?
 
 struct Texture {
     int w, h;
     int pixel_format;
     uint32_t *data;
+    int minimizing_filter, magnifying_filter;
     bool swizzled;
+    bool gpu_ready;
 
     //This is used to know which function to call to deallocate data
     TextureDataStatus status;
@@ -32,10 +33,18 @@ struct Texture {
     ~Texture();
 
     static Texture *Load(const char *path);
+    static Texture *Create(int width, int height, bool ensure_valid_size = true);
     static Texture *Sample(int width, int height);
 
     void Swizzle();
     void Free();
+
+    //Return the ABGR color at a specific pixel coordinate (returns blank if out of bound)
+    uint32_t GetPixel(int x, int y);
+
+    void SetPixel(int x, int y, uint32_t color);
+
+    Texture *CopyAndResize(int width, int height, bool ensure_valid_size = true);
 
 private:
     Texture(int w, int h, int pixel_format, uint32_t *data);

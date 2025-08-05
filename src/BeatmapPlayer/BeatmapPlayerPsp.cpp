@@ -1,20 +1,36 @@
 #include "BeatmapPlayerPsp.h"
 
 #include <cstdio>
+#include <cstdlib>
+#include <pspgum.h>
+#include <psprtc.h>
 
 #include "../Beatmap/Beatmap.h"
 #include "../Platform/Psp/Audio/AudioThread.h"
 #include "../Platform/Psp/Core.h"
+#include "../Platform/Psp/Graphics/Texture.h"
 #include "../Platform/Psp/Graphics/2d.h"
+#include "../Platform/Psp/Graphics/Vertex.h"
 
-BeatmapPlayerPsp::BeatmapPlayerPsp(Ruleset *ruleset, Beatmap *beatmap) : BeatmapPlayer(ruleset, beatmap) {
+BeatmapPlayerPsp::BeatmapPlayerPsp(Ruleset *ruleset, Beatmap *beatmap) : BeatmapPlayer(ruleset, beatmap), m_background(nullptr) {
 }
 
-BeatmapPlayerPsp::~BeatmapPlayerPsp() = default;
+BeatmapPlayerPsp::~BeatmapPlayerPsp() {
+    delete m_background;
+    m_background = nullptr;
+}
+
+bool BeatmapPlayerPsp::LoadResourcesInternal() {
+    if (!BeatmapPlayer::LoadResourcesInternal()) return false;
+
+    LoadBackground();
+    return true;
+}
 
 void BeatmapPlayerPsp::Draw() {
     if (m_ruleset == nullptr) return;
 
+    DrawBackground();
     m_ruleset->Draw();
 
     char buf[256];
@@ -49,6 +65,71 @@ void BeatmapPlayerPsp::Draw() {
     if (audio) {
         int sample_rate = audio->GetSampleRate();
         sniprintf(buf, 256, "sample rate: %dhz\n", sample_rate);
-        DrawText(buf, g_default_font, {SCREEN_WIDTH-160, 22.f}, 0.f, 1, (sample_rate == 44100) ? 0xFF00AA00 : 0xFF0000AA);
+        DrawText(buf, g_default_font, {SCREEN_WIDTH-300, 22.f}, 0.f, 1, (sample_rate == 44100) ? 0xFF00AA00 : 0xFF0000AA);
     }
+}
+
+
+/////////////////////////////
+///PRIVATE
+
+//if there is too much lag reduce the scale factor
+static constexpr int background_width = (int)((float)SCREEN_WIDTH * 0.5f);
+static constexpr int background_height = (int)((float)SCREEN_HEIGHT * 0.5f);
+
+void BeatmapPlayerPsp::LoadBackground() {
+    if ( m_beatmap == nullptr) return;
+    if (m_beatmap->GetBackground() == nullptr) return; //no background
+
+    if (m_background != nullptr) {
+        delete m_background;
+        m_background = nullptr;
+    }
+
+    char background_path[1024];
+    snprintf(background_path, sizeof(background_path), "%s/%s", m_beatmap->GetRootPath(), m_beatmap->GetBackground());
+
+    Texture *background = Texture::Load(background_path);
+    if (background == nullptr) {
+        printf("Failed to load %s\n", background_path);
+        return;
+    }
+    printf("First background loaded with a size of %d*%d\n", background->w, background->h);
+
+    m_background = background->CopyAndResize(background_width, background_height);
+    if (m_background == nullptr) return;
+    printf("Second background loaded with a size of %d*%d\n", m_background->w, m_background->h);
+    m_background->minimizing_filter = GU_LINEAR;
+    m_background->magnifying_filter = GU_LINEAR;
+
+    m_background->Swizzle();
+    delete background;
+}
+
+
+void BeatmapPlayerPsp::DrawBackground() {
+    if (m_background == nullptr) return;
+
+    uint32_t color = 0xFF333333;
+
+    static Vertex_UV32_Color32_XYZ32 vertices[] = {
+        {0, 0, color, 0, 0, 0}, //top left
+        {background_width, 0, color, SCREEN_WIDTH, 0, 0}, //top right
+        {0, background_height, color, 0, SCREEN_HEIGHT, 0}, //bottom left
+        {background_width, background_height, color, SCREEN_WIDTH, SCREEN_HEIGHT, 0}, //bottom right
+    };
+
+    static uint8_t indices[] = {
+        0, 1, 2,
+        1, 3, 2
+    };
+
+    GpuUseTexture(m_background);
+    sceGuEnable(GU_TEXTURE_2D);
+    sceGuDisable(GU_BLEND);
+    sceGuDisable(GU_DEPTH_TEST);
+    sceGumDrawArray(GU_TRIANGLES, Vertex_UV32_Color32_XYZ32::flags | GU_INDEX_8BIT | GU_TRANSFORM_3D, 6, indices, vertices);
+    sceGuDisable(GU_TEXTURE_2D);
+    sceGuEnable(GU_BLEND);
+    sceGuEnable(GU_DEPTH_TEST);
 }

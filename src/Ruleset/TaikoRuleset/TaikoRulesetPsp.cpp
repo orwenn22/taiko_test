@@ -46,6 +46,8 @@ bool TaikoRulesetPsp::LoadResourcesInternal() {
     m_taiko_sheet = Texture::Load("res/skin/Taiko/sheet.png");
     if (m_taiko_sheet == nullptr) return false;
     m_taiko_sheet->Swizzle();
+    m_taiko_sheet->minimizing_filter = GU_LINEAR;
+    m_taiko_sheet->magnifying_filter = GU_LINEAR;
 
     auto beatmap = GetBeatmap<TaikoBeatmap>();
     char file_path_buf[256];
@@ -105,10 +107,10 @@ void TaikoRulesetPsp::Draw() {
 
 void TaikoRulesetPsp::DrawPlayfield() {
     Vertex_Color32_XYZ32 *playfield_vertices = (Vertex_Color32_XYZ32 *) sceGuGetMemory(sizeof(Vertex_Color32_XYZ32) * 4);
-    playfield_vertices[0] = {0xFF0a0a0a, 0, PLAYFIELD_ORIGIN_Y, -100.f}; //top left
-    playfield_vertices[1] = {0xFF0a0a0a, PLAYFIELD_WIDTH, PLAYFIELD_ORIGIN_Y, -100.f}; //top right
-    playfield_vertices[2] = {0xFF0a0a0a, 0, PLAYFIELD_ORIGIN_Y+PLAYFIELD_HEIGHT, -100.f}; //bottom left
-    playfield_vertices[3] = {0xFF0a0a0a, PLAYFIELD_WIDTH, PLAYFIELD_ORIGIN_Y+PLAYFIELD_HEIGHT, -100.f}; //bottom right
+    playfield_vertices[0] = {0xDD0a0a0a, 0, PLAYFIELD_ORIGIN_Y, -100.f}; //top left
+    playfield_vertices[1] = {0xDD0a0a0a, PLAYFIELD_WIDTH, PLAYFIELD_ORIGIN_Y, -100.f}; //top right
+    playfield_vertices[2] = {0xDD0a0a0a, 0, PLAYFIELD_ORIGIN_Y+PLAYFIELD_HEIGHT, -100.f}; //bottom left
+    playfield_vertices[3] = {0xDD0a0a0a, PLAYFIELD_WIDTH, PLAYFIELD_ORIGIN_Y+PLAYFIELD_HEIGHT, -100.f}; //bottom right
 
     uint8_t *playfield_indices = (uint8_t *) sceGuGetMemory(sizeof(uint8_t) * 6);
     playfield_indices[0] = 0;

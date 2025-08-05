@@ -2,17 +2,37 @@
 
 #include "Swizzle.h"
 
+#include <pspgu.h>
 #include <psputils.h>
 
 #define STB_IMAGE_IMPLEMENTATION
-#include <pspgu.h>
 #include <stb_image.h>
 
 
+//used for minimum texture width
+static unsigned int NextPowerOfTwo(unsigned int x) {
+    if (x == 0) return 1;
+    x--;
+    x |= x >> 1;
+    x |= x >> 2;
+    x |= x >> 4;
+    x |= x >> 8;
+    x |= x >> 16;
+    return x + 1;
+}
 
-Texture::Texture(int w, int h, int pixel_format, uint32_t *data) :
-w(w), h(h), pixel_format(pixel_format), data(data), swizzled(false), status(STATUS_UNKNOWN),
-tex_scale_multiplier_x(1.f/(float)w), tex_scale_multiplier_y(1.f/(float)h) {
+static bool IsPowerOfTwo(unsigned int x) {
+    //somehow all those computer science classes about binary weren't useless
+    return x != 0 && (x & (x - 1)) == 0;
+}
+
+
+Texture::Texture(int w, int h, int pixel_format, uint32_t *data)
+    : w(w), h(h), pixel_format(pixel_format), data(data),
+      minimizing_filter(GU_NEAREST), magnifying_filter(GU_NEAREST),
+      swizzled(false), status(STATUS_UNKNOWN),
+      tex_scale_multiplier_x(1.f/(float)w), tex_scale_multiplier_y(1.f/(float)h),
+      gpu_ready(IsPowerOfTwo(w) && IsPowerOfTwo(h)) {
 
 }
 
@@ -26,6 +46,7 @@ Texture::~Texture() {
     data = nullptr;
     swizzled = false;
     status = STATUS_UNKNOWN;
+    gpu_ready = false;
 }
 
 Texture *Texture::Load(const char *path) {
@@ -40,6 +61,24 @@ Texture *Texture::Load(const char *path) {
     sceKernelDcacheWritebackInvalidateAll();
     Texture *result = new Texture(w, h, GU_PSM_8888, data);
     result->status = STATUS_STBI_MANAGED;
+    return result;
+}
+
+Texture *Texture::Create(int width, int height, bool ensure_valid_size) {
+    if (width <= 0 || height <= 0) return nullptr;
+
+    if (ensure_valid_size) {
+        width = (int)NextPowerOfTwo((unsigned int)width);
+        height = (int)NextPowerOfTwo((unsigned int)height);
+    }
+
+    size_t alloc_size = sizeof(uint32_t) * width * height;
+    uint32_t *pixels = (uint32_t *) malloc(alloc_size);
+    if (pixels == nullptr) return nullptr;
+
+    for (size_t i = 0; i < width*height; i++) pixels[i] = 0;
+    Texture *result = new Texture(width, height, GU_PSM_8888, pixels);
+    result->status = STATUS_MALLOC_MANAGED;
     return result;
 }
 
@@ -65,6 +104,7 @@ Texture *Texture::Sample(int width, int height) {
     result->status = STATUS_MALLOC_MANAGED;
     return result;
 }
+
 
 void Texture::Swizzle() {
     if (data == nullptr || w <= 0 || h <= 0 || w%8 != 0 || h%8 != 0) return;
@@ -95,6 +135,7 @@ void Texture::Swizzle() {
     sceKernelDcacheWritebackInvalidateAll();
 }
 
+
 void Texture::Free() {
     if (status == STATUS_STBI_MANAGED) stbi_image_free(data);
     else if (status == STATUS_MALLOC_MANAGED) free(data);
@@ -104,17 +145,56 @@ void Texture::Free() {
     data = nullptr;
 }
 
+
+uint32_t Texture::GetPixel(int x, int y) {
+    if (swizzled || pixel_format != GU_PSM_8888 || data == nullptr) return 0; //TODO: implement this for other pixel formats (and maybe for swizzled textures as well?)
+    if (x < 0 || y < 0 || w <= 0 || h <= 0 || x >= w || y >= h) return 0;
+
+    return data[x + y * w];
+}
+
+void Texture::SetPixel(int x, int y, uint32_t color) {
+    if (swizzled || pixel_format != GU_PSM_8888 || data == nullptr) return; //TODO: implement this for other pixel formats (and maybe for swizzled textures as well?)
+    if (x < 0 || y < 0 || w <= 0 || h <= 0 || x >= w || y >= h) return;
+
+    data[x + y * w] = color;
+}
+
+
+Texture *Texture::CopyAndResize(int width, int height, bool ensure_valid_size) {
+    Texture *result = Create(width, height, ensure_valid_size);
+    if (result == nullptr) return nullptr;
+
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            int source_x = x * w / width;
+            int source_y = y * h / height;
+
+            result->SetPixel(x, y, GetPixel(source_x, source_y));
+            //if (x%10 == 0 && y%10 == 0) printf("%i %i (%x) -> %i %i\n", source_x, source_y, data[source_x + source_y * w], x, y);
+        }
+    }
+
+    sceKernelDcacheWritebackInvalidateAll();
+    return result;
+}
+
 static Texture *s_current_texture = nullptr;
 
 void GpuUseTexture(Texture *texture) {
     //Only change texture if necessary
-    if (s_current_texture == texture) return;
+    if (s_current_texture == texture || texture == nullptr) return;
+
+    if (!texture->gpu_ready) {
+        printf("Trying to draw a texture with an invalid size (%i *%i)", texture->w, texture->h);
+        return;
+    }
 
     sceGuTexImage(0, texture->w, texture->h, texture->w, texture->data);
     sceGuTexFunc(GU_TFX_MODULATE, GU_TCC_RGBA); //GU_TFX_MODULATE seems required for tinting textures, GU_TFX_REPLACE doesn't take vertex colors into account  TODO : parameter to manipulate this ?
     sceGuTexMode(texture->pixel_format, 0, 0, texture->swizzled ? GU_TRUE : GU_FALSE);
-    sceGuTexFilter(GU_NEAREST,GU_NEAREST); //TODO : parameter to manipulate this?
-    sceGuTexScale(texture->tex_scale_multiplier_x, texture->tex_scale_multiplier_y); //TODO: do this only one time somehow (and not evey time we use the texture)
+    sceGuTexFilter(texture->minimizing_filter,texture->magnifying_filter);
+    sceGuTexScale(texture->tex_scale_multiplier_x, texture->tex_scale_multiplier_y);
     sceGuTexOffset(0.f, 0.f);
     s_current_texture = texture;
 }

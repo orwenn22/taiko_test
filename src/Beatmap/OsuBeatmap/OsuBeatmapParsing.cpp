@@ -116,6 +116,9 @@ static void HandleDifficultyLine(OsuBeatmap *beatmap, char *line) {
 //TODO: currently this is only used to get the background, it doesn't do anything else
 void HandleEventLine(OsuBeatmap *beatmap, char *line) {
     //Event syntax: eventType,startTime,eventParams
+    if (line[0] < '0' || line[0] > '9') return; //dirty hack to make lagtrain work
+    //TODO: make it possible to know if parseInt failed, this way we don't have to do the thing above
+
     size_t line_length = strlen(line);
     size_t current_index = 0;
     int event_type = ParseInt(line, &current_index);
