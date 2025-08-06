@@ -20,10 +20,10 @@ void CorrectCWD(const char *argv0) {
     char buf[512];
     realpath(argv0, buf);
 
-    size_t len = strlen(argv0);
+    size_t len = strlen(buf);
     size_t last_slash = len;
-    for (size_t i = 0; i < len; i++) {
-        if (argv0[i] == '/') last_slash = i;
+    for (size_t i = 0; i < len; ++i) {
+        if (buf[i] == '/') last_slash = i;
     }
     buf[last_slash] = 0;
 
