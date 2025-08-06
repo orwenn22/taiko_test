@@ -30,7 +30,7 @@ int main(int argc, const char *argv[]) {
     InitInputHandling();
 
     //NOTE: this assumes that the map file exists
-    SceneManager *scene_manager = new SceneManager(BeatmapLoader::LoadFromFile<BeatmapPlayerPsp>("res/maps/lagtrain/lagtrain.txt"));
+    SceneManager *scene_manager = new SceneManager(BeatmapLoader::LoadFromFile<BeatmapPlayerPsp>("res/maps/circles/KIRA - Circles (feat. GUMI) (Amasugi) [Melancholy].osu"));
 
     u64 tick_postdraw_previous = 0;
     u64 tick_preinput = 0;

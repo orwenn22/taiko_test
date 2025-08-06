@@ -73,9 +73,8 @@ void BeatmapPlayerPsp::Draw() {
 /////////////////////////////
 ///PRIVATE
 
-//if there is too much lag reduce the scale factor
-static constexpr int background_width = (int)((float)SCREEN_WIDTH * 0.5f);
-static constexpr int background_height = (int)((float)SCREEN_HEIGHT * 0.5f);
+static constexpr int background_width = SCREEN_WIDTH;
+static constexpr int background_height = SCREEN_HEIGHT;
 
 void BeatmapPlayerPsp::LoadBackground() {
     if ( m_beatmap == nullptr) return;
@@ -96,13 +95,17 @@ void BeatmapPlayerPsp::LoadBackground() {
     }
     printf("First background loaded with a size of %d*%d\n", background->w, background->h);
 
-    m_background = background->CopyAndResize(background_width, background_height);
-    if (m_background == nullptr) return;
-    printf("Second background loaded with a size of %d*%d\n", m_background->w, m_background->h);
+    Texture *resized_background = background->CopyAndResize(background_width, background_height);
+    if (resized_background == nullptr) return;
+    printf("Second background loaded with a size of %d*%d\n", resized_background->w, resized_background->h);
+    resized_background->Swizzle();
+
+    m_background = resized_background->CopyToVram();
+    //m_background = resized_background;
     m_background->minimizing_filter = GU_LINEAR;
     m_background->magnifying_filter = GU_LINEAR;
 
-    m_background->Swizzle();
+    delete resized_background;
     delete background;
 }
 

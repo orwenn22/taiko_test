@@ -179,6 +179,23 @@ Texture *Texture::CopyAndResize(int width, int height, bool ensure_valid_size) {
     return result;
 }
 
+
+//TODO: make it possible to choose where this goes
+//      right now this is hardcoded to ga after the depthbuffer
+Texture *Texture::CopyToVram() {
+    if (!gpu_ready) return nullptr;
+
+    //              vram base  fb0    fb1    dpthb
+    memcpy((void *)(0x04000000+557056+557056+557056/2), data, w * h * sizeof(uint32_t));
+    auto result = new Texture(w, h, GU_PSM_8888, (uint32_t *)(0x04000000+557056+557056+557056/2));
+    result->swizzled = swizzled;
+    result->status = STATUS_VRAM_MANAGED;
+    return result;
+
+    //sceGuCopyImage(GU_PSM_8888, 0, 0, w*h, 1, w*h, data, 0, 0, w*h, (void *)(0x04000000+557056+557056+557056)); //memcpy call equivalent
+}
+
+
 static Texture *s_current_texture = nullptr;
 
 void GpuUseTexture(Texture *texture) {

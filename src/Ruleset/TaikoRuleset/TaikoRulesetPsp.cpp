@@ -60,8 +60,11 @@ bool TaikoRulesetPsp::LoadResourcesInternal() {
 
 void TaikoRulesetPsp::StartAudio(float offset) {
     TaikoRuleset::StartAudio(offset);
-    m_audio->Seek(offset);
-    SetCurrentAudioStream(m_audio);
+    
+    if(m_audio != nullptr) {
+        m_audio->Seek(offset);
+        SetCurrentAudioStream(m_audio);
+    }
 }
 
 void TaikoRulesetPsp::OnGameEnd() {
