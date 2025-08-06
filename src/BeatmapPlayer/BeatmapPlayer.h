@@ -22,8 +22,6 @@ public:
     //Called by BeatmapPlayer::LoadResources(), should be called before OnGameStart()
     //This does nothing by default, but subclasses should overwrite this to load stuff from the beatmap (such as the
     //background image)
-    //In the future it would be cool to have some kind of "PrePlayer" scene that would load in another thread all the
-    //resources (both for the player and the ruleset)
     //should return false if a critical resource failed to load
     virtual bool LoadResourcesInternal();
 
