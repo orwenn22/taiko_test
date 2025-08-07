@@ -28,11 +28,12 @@ static bool IsPowerOfTwo(unsigned int x) {
 
 
 Texture::Texture(int w, int h, int pixel_format, uint32_t *data)
-    : w(w), h(h), pixel_format(pixel_format), data(data),
+    : w(w), h(h), fake_h((int)NextPowerOfTwo(h)),
+      pixel_format(pixel_format), data(data),
       minimizing_filter(GU_NEAREST), magnifying_filter(GU_NEAREST),
-      swizzled(false), status(STATUS_UNKNOWN),
-      tex_scale_multiplier_x(1.f/(float)w), tex_scale_multiplier_y(1.f/(float)h),
-      gpu_ready(IsPowerOfTwo(w) && IsPowerOfTwo(h)) {
+      swizzled(false), gpu_ready(IsPowerOfTwo(w)),
+      status(STATUS_UNKNOWN),
+      tex_scale_multiplier_x(1.f/(float)w), tex_scale_multiplier_y(1.f/(float)fake_h) {
 
 }
 
@@ -42,6 +43,7 @@ Texture::~Texture() {
     //this is probably unnecessary, but it might mitigate use after free mistakes? idk
     w = 0;
     h = 0;
+    fake_h = 0;
     pixel_format = 0;
     data = nullptr;
     swizzled = false;
@@ -64,13 +66,11 @@ Texture *Texture::Load(const char *path) {
     return result;
 }
 
-Texture *Texture::Create(int width, int height, bool ensure_valid_size) {
+Texture *Texture::Create(int width, int height, bool ensure_valid_width, bool ensure_valid_height) {
     if (width <= 0 || height <= 0) return nullptr;
 
-    if (ensure_valid_size) {
-        width = (int)NextPowerOfTwo((unsigned int)width);
-        height = (int)NextPowerOfTwo((unsigned int)height);
-    }
+    if (ensure_valid_width) width = (int)NextPowerOfTwo((unsigned int)width);
+    if (ensure_valid_height) height = (int)NextPowerOfTwo((unsigned int)height);
 
     size_t alloc_size = sizeof(uint32_t) * width * height;
     uint32_t *pixels = (uint32_t *) malloc(alloc_size);
@@ -111,7 +111,7 @@ void Texture::Swizzle() {
     if (swizzled) return;
 
     // allocate memory for the swizzled texture
-    uint32_t *swizzled_data = (uint32_t *) malloc(sizeof(uint32_t) * w * h);
+    uint32_t *swizzled_data = (uint32_t *) malloc(GetDataSize());
     if (swizzled_data == nullptr) return;
 
     // swizzle the texture
@@ -145,6 +145,19 @@ void Texture::Free() {
     data = nullptr;
 }
 
+size_t Texture::GetDataSize() {
+    switch (pixel_format) {
+        case GU_PSM_8888: return sizeof(uint32_t) * w * h;
+        case GU_PSM_4444: return sizeof(uint16_t) * w * h; //TODO: test if this is correct
+        default:
+            printf("TODO: implement Texture::GetDataSize() for pixel format %d\n", pixel_format);
+            return 0;
+    }
+
+    //shouldn't get reached
+    return 0;
+}
+
 
 uint32_t Texture::GetPixel(int x, int y) {
     if (swizzled || pixel_format != GU_PSM_8888 || data == nullptr) return 0; //TODO: implement this for other pixel formats (and maybe for swizzled textures as well?)
@@ -161,8 +174,8 @@ void Texture::SetPixel(int x, int y, uint32_t color) {
 }
 
 
-Texture *Texture::CopyAndResize(int width, int height, bool ensure_valid_size) {
-    Texture *result = Create(width, height, ensure_valid_size);
+Texture *Texture::CopyAndResize(int width, int height, bool ensure_valid_width, bool ensure_valid_height) {
+    Texture *result = Create(width, height, ensure_valid_width, ensure_valid_height);
     if (result == nullptr) return nullptr;
 
     for (int y = 0; y < height; ++y) {
@@ -180,16 +193,23 @@ Texture *Texture::CopyAndResize(int width, int height, bool ensure_valid_size) {
 }
 
 
-//TODO: make it possible to choose where this goes
-//      right now this is hardcoded to ga after the depthbuffer
-Texture *Texture::CopyToVram() {
+Texture *Texture::CopyToVram(void *dest) {
     if (!gpu_ready) return nullptr;
+    if ((size_t)dest < 0x04000000ul) return nullptr; //bound check (start of vram)
+    if (((size_t)dest)%16 != 0) return nullptr; //textures must be 16-bytes alligned
 
-    //              vram base  fb0    fb1    dpthb
-    memcpy((void *)(0x04000000+557056+557056+557056/2), data, w * h * sizeof(uint32_t));
-    auto result = new Texture(w, h, GU_PSM_8888, (uint32_t *)(0x04000000+557056+557056+557056/2));
+    size_t data_size = GetDataSize();
+
+    if ((size_t)dest + data_size > 0x04200000ul) return nullptr; //bound check (end of vram)
+
+    //TODO: keep track of where we put textures in vram, and prevent overlaps?
+
+    memcpy(dest, data, data_size);
+    auto result = new Texture(w, h, pixel_format, (uint32_t *)dest);
     result->swizzled = swizzled;
     result->status = STATUS_VRAM_MANAGED;
+
+    sceKernelDcacheWritebackInvalidateAll();
     return result;
 
     //sceGuCopyImage(GU_PSM_8888, 0, 0, w*h, 1, w*h, data, 0, 0, w*h, (void *)(0x04000000+557056+557056+557056)); //memcpy call equivalent
@@ -203,11 +223,11 @@ void GpuUseTexture(Texture *texture) {
     if (s_current_texture == texture || texture == nullptr) return;
 
     if (!texture->gpu_ready) {
-        printf("Trying to draw a texture with an invalid size (%i *%i)", texture->w, texture->h);
+        printf("Trying to draw a texture with an invalid size (%i*%i (%i))", texture->w, texture->h, texture->fake_h);
         return;
     }
 
-    sceGuTexImage(0, texture->w, texture->h, texture->w, texture->data);
+    sceGuTexImage(0, texture->w, texture->fake_h, texture->w, texture->data);
     sceGuTexFunc(GU_TFX_MODULATE, GU_TCC_RGBA); //GU_TFX_MODULATE seems required for tinting textures, GU_TFX_REPLACE doesn't take vertex colors into account  TODO : parameter to manipulate this ?
     sceGuTexMode(texture->pixel_format, 0, 0, texture->swizzled ? GU_TRUE : GU_FALSE);
     sceGuTexFilter(texture->minimizing_filter,texture->magnifying_filter);

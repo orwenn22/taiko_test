@@ -95,12 +95,12 @@ void BeatmapPlayerPsp::LoadBackground() {
     }
     printf("First background loaded with a size of %d*%d\n", background->w, background->h);
 
-    Texture *resized_background = background->CopyAndResize(background_width, background_height);
+    Texture *resized_background = background->CopyAndResize(background_width, background_height, true, false);
     if (resized_background == nullptr) return;
     printf("Second background loaded with a size of %d*%d\n", resized_background->w, resized_background->h);
     resized_background->Swizzle();
 
-    m_background = resized_background->CopyToVram();
+    m_background = resized_background->CopyToVram((void *)0x04154000);
     //m_background = resized_background;
     m_background->minimizing_filter = GU_LINEAR;
     m_background->magnifying_filter = GU_LINEAR;
