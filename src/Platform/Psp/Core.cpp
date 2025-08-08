@@ -92,9 +92,6 @@ static void InitGu() {
 }
 
 static void EndGu() {
-    delete g_default_font;
-    g_default_font = nullptr;
-
     sceGuDisplay(GU_FALSE);
     sceGuTerm();
 }
@@ -135,6 +132,8 @@ int ShouldClose() {
 
 void EndCore() {
     delete g_default_font;
+    g_default_font = nullptr;
+
     EndGu();
     pspAudioSetChannelCallback(0, NULL, NULL);
     pspAudioEnd();
