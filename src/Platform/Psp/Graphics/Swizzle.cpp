@@ -2,24 +2,46 @@
 
 #include <cstdint>
 
-#define BLOCK_WIDTH 4
-#define BLOCK_HEIGHT 8
 
 // for abgr8888
 // self-made by looking at how a non-swizzled texture is displayed with the swizzle flag enabled,
-// so it probably has tons of issues
 void swizzle_abgr8888(uint32_t *out, const uint32_t *in, unsigned int width, unsigned int height) {
-    unsigned int h_block_count = width / BLOCK_WIDTH;
-    unsigned int v_block_count = height / BLOCK_HEIGHT;
+    constexpr unsigned int block_width = 4;
+    constexpr unsigned int block_height = 8;
+
+    unsigned int h_block_count = width / block_width;
+    unsigned int v_block_count = height / block_height;
 
     int dest_index = 0;
 
     for (unsigned int v = 0; v < v_block_count; ++v) {
         for (unsigned int h = 0; h < h_block_count; ++h) {
-            for (unsigned int y = 0; y < BLOCK_HEIGHT; ++y) {
-                for (unsigned int x = 0; x < BLOCK_WIDTH; ++x) {
-                    unsigned int source_x = h * BLOCK_WIDTH + x;
-                    unsigned int source_y = v * BLOCK_HEIGHT + y;
+            for (unsigned int y = 0; y < block_height; ++y) {
+                for (unsigned int x = 0; x < block_width; ++x) {
+                    unsigned int source_x = h * block_width + x;
+                    unsigned int source_y = v * block_height + y;
+                    out[dest_index++] = in[source_x + source_y * width];
+                }
+            }
+        }
+    }
+}
+
+void swizzle_abgr4444(uint16_t *out, const uint16_t *in, unsigned int width, unsigned int height) {
+    constexpr unsigned int block_width = 8;
+    constexpr unsigned int block_height = 8;
+
+    unsigned int h_block_count = width / block_width;
+    unsigned int v_block_count = height / block_height;
+
+    int dest_index = 0;
+
+    for (unsigned int v = 0; v < v_block_count; ++v) {
+        for (unsigned int h = 0; h < h_block_count; ++h) {
+            for (unsigned int y = 0; y < block_height; ++y) {
+                for (unsigned int x = 0; x < block_width; ++x) {
+                    unsigned int source_x = h * block_width + x;
+                    unsigned int source_y = v * block_height + y;
                     out[dest_index++] = in[source_x + source_y * width];
                 }
             }
@@ -28,9 +50,11 @@ void swizzle_abgr8888(uint32_t *out, const uint32_t *in, unsigned int width, uns
 }
 
 
+
 //for abgr4444
 //from https://github.com/pspdev/pspsdk/blob/master/src/samples/gu/blit/blit.c therefore it is most likely correct
-void swizzle_abgr4444(uint8_t *out, const uint8_t *in, unsigned int width, unsigned int height) {
+//update: i got scammed, but keeping this here just in case
+/*void swizzle_abgr4444(uint8_t *out, const uint8_t *in, unsigned int width, unsigned int height) {
     unsigned int blockx, blocky;
     unsigned int j;
 
@@ -58,4 +82,4 @@ void swizzle_abgr4444(uint8_t *out, const uint8_t *in, unsigned int width, unsig
         }
         ysrc += src_row;
     }
-}
+}*/

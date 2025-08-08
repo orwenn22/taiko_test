@@ -26,7 +26,7 @@ void clearBackground(unsigned int color) {
 
 
 int main(int argc, const char *argv[]) {
-    InitCore();
+    InitCore(GU_PSM_8888);
     InitInputHandling();
 
     //NOTE: this assumes that the map file exists

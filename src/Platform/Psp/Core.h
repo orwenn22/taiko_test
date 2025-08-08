@@ -10,7 +10,7 @@ struct Font;
 
 extern Font *g_default_font;
 
-void InitCore();
+void InitCore(int draw_buffer_psm);
 int ShouldClose();
 void EndCore();
 

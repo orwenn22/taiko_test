@@ -67,8 +67,12 @@ struct Texture {
     uint32_t GetPixel(int x, int y); //returns blank if out of bound
     void SetPixel(int x, int y, uint32_t color);
 
+    Texture *Copy();
 
     Texture *CopyAndResize(int width, int height, bool ensure_valid_width = true, bool ensure_valid_height = true);
+
+    Texture *CopyAndConvert(unsigned int copy_pixel_format);
+
 
     //Assuming a setup with fb0/fb1 ABRR8888 and a depth buffer, the first block of available vram
     //starts at 0x04154000  (0x04000000+0d557056+0d557056+0d557056/2)

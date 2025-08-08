@@ -50,12 +50,12 @@ static int setup_callbacks(void) {
     return thid;
 }
 
-static void InitGu() {
+static void InitGu(int draw_buffer_psm) {
     sceGuInit();
 
     //Set up buffers
     sceGuStart(GU_DIRECT, list);
-    sceGuDrawBuffer(GU_PSM_8888,(void*)0,BUFFER_WIDTH);
+    sceGuDrawBuffer(draw_buffer_psm,(void*)0,BUFFER_WIDTH);
     sceGuDispBuffer(SCREEN_WIDTH,SCREEN_HEIGHT,(void*)0x88000,BUFFER_WIDTH);
     sceGuDepthBuffer((void*)0x110000,BUFFER_WIDTH);
 
@@ -97,7 +97,7 @@ static void EndGu() {
 }
 
 
-void InitCore() {
+void InitCore(int draw_buffer_psm) {
     s_running = 1;
 
     // Make exiting with the home button possible
@@ -113,7 +113,7 @@ void InitCore() {
     pspAudioSetChannelCallback(0, AudioCallback, nullptr);
 
     // Setup rendering
-    InitGu();
+    InitGu(draw_buffer_psm);
     End2D();
 
     sceRtcGetCurrentTick(&s_previous_frame_tick);

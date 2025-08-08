@@ -1,12 +1,13 @@
 #include "Texture.h"
 
-#include "Swizzle.h"
-
 #include <pspgu.h>
 #include <psputils.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
+
+#include "Swizzle.h"
+#include "TextureConvert.h"
 
 
 //used for minimum texture width
@@ -117,7 +118,7 @@ void Texture::Swizzle() {
     // swizzle the texture
     switch (pixel_format) {
         case GU_PSM_8888: swizzle_abgr8888(swizzled_data, data, w, h); break;
-        case GU_PSM_4444: swizzle_abgr4444((uint8_t *)swizzled_data, (const uint8_t *)data, w, h); break; // TODO : test if this actually works lmao
+        case GU_PSM_4444: swizzle_abgr4444((uint16_t *)swizzled_data, (const uint16_t *)data, w, h); break; // TODO : test if this actually works lmao
 
         default:
             // TODO : implement relevant swizzle function for this format.
@@ -126,12 +127,19 @@ void Texture::Swizzle() {
             return;
     }
 
-    // clear the previous data buffer and replace it with the swizzled texture
-    Free();
-    data = swizzled_data;
-    status = STATUS_MALLOC_MANAGED;
-    swizzled = true;
+    //if we want to swizzle a texture in vram, we probably expect the swizzled result to replace the previous data in vram
+    if (status == STATUS_VRAM_MANAGED) {
+        memcpy(data, swizzled_data, GetDataSize());
+        free(swizzled_data);
+    }
+    else {
+        // clear the previous data buffer and replace it with the swizzled texture
+        Free();
+        data = swizzled_data;
+        status = STATUS_MALLOC_MANAGED;
+    }
 
+    swizzled = true;
     sceKernelDcacheWritebackInvalidateAll();
 }
 
@@ -174,7 +182,32 @@ void Texture::SetPixel(int x, int y, uint32_t color) {
 }
 
 
+Texture *Texture::Copy() {
+    size_t alloc_size = GetDataSize();
+    void *new_data = (void *) malloc(alloc_size);
+    if (new_data == nullptr) return nullptr;
+
+    memcpy(new_data, data, alloc_size);
+
+    auto result =  new Texture(w, h, pixel_format, (uint32_t *)new_data);
+    result->status = STATUS_MALLOC_MANAGED;
+    result->minimizing_filter = minimizing_filter;
+    result->magnifying_filter = magnifying_filter;
+    return result;
+}
+
+
 Texture *Texture::CopyAndResize(int width, int height, bool ensure_valid_width, bool ensure_valid_height) {
+    if (pixel_format != GU_PSM_8888) {
+        printf("Texture::CopyAndResize() not implemented for pixel format %i\n", pixel_format);
+        return nullptr;
+    }
+    if (swizzled) {
+        //the best way to go around that is to swizzle after resizing
+        printf("Texture::CopyAndResize() not implemented for swizzled textures\n");
+        return nullptr;
+    }
+
     Texture *result = Create(width, height, ensure_valid_width, ensure_valid_height);
     if (result == nullptr) return nullptr;
 
@@ -190,6 +223,36 @@ Texture *Texture::CopyAndResize(int width, int height, bool ensure_valid_width, 
 
     sceKernelDcacheWritebackInvalidateAll();
     return result;
+}
+
+Texture *Texture::CopyAndConvert(unsigned int copy_pixel_format) {
+    if (copy_pixel_format > GU_PSM_8888) return nullptr; //don't support anything beyond that for now
+    if (swizzled) {
+        printf("Texture::CopyAndConvert() not implemented for swizzled textures\n");
+        return nullptr;
+    }
+
+    if (copy_pixel_format == pixel_format) return Copy(); //TODO: this is a waste of space, maybe return nullptr instead?
+
+    if (pixel_format == GU_PSM_8888 && copy_pixel_format == GU_PSM_4444) {
+        uint16_t *new_data = (uint16_t *) malloc(w * h * sizeof(uint16_t));
+        if (new_data == nullptr) return nullptr;
+
+        if (!convert_argb8888_to_abgr4444(w, h, data, (uint16_t *)new_data)) {
+            free(new_data);
+            return nullptr;
+        }
+
+        auto result = new Texture(w, h, copy_pixel_format, (uint32_t *)new_data);
+        result->status = STATUS_MALLOC_MANAGED;
+        result->minimizing_filter = minimizing_filter;
+        result->magnifying_filter = magnifying_filter;
+        return result;
+    }
+
+    //I don't think ABGR4444->ABGR8888 conversion would be that useful, but display this message just in case
+    printf("Texture::CopyAndConvert() not implemented for conversion %i -> %i\n", pixel_format, copy_pixel_format);
+    return nullptr;
 }
 
 

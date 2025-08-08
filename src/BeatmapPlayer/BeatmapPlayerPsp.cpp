@@ -12,6 +12,11 @@
 #include "../Platform/Psp/Graphics/2d.h"
 #include "../Platform/Psp/Graphics/Vertex.h"
 
+//comment this to convert the background to ABGR4444 to save space in vram
+//(also better performance, looks ugly though)
+#define BG_ABGR8888
+
+
 BeatmapPlayerPsp::BeatmapPlayerPsp(Ruleset *ruleset, Beatmap *beatmap) : BeatmapPlayer(ruleset, beatmap), m_background(nullptr) {
 }
 
@@ -88,6 +93,7 @@ void BeatmapPlayerPsp::LoadBackground() {
     char background_path[1024];
     snprintf(background_path, sizeof(background_path), "%s/%s", m_beatmap->GetRootPath(), m_beatmap->GetBackground());
 
+    //load background from image
     Texture *background = Texture::Load(background_path);
     if (background == nullptr) {
         printf("Failed to load %s\n", background_path);
@@ -95,18 +101,34 @@ void BeatmapPlayerPsp::LoadBackground() {
     }
     printf("First background loaded with a size of %d*%d\n", background->w, background->h);
 
+    //resize to match display size
     Texture *resized_background = background->CopyAndResize(background_width, background_height, true, false);
+    delete background;
     if (resized_background == nullptr) return;
     printf("Second background loaded with a size of %d*%d\n", resized_background->w, resized_background->h);
-    resized_background->Swizzle();
+    //resized_background->Swizzle();
 
+#ifndef BG_ABGR8888
+    //convert to abgr4444
+    Texture *converted_background = resized_background->CopyAndConvert(GU_PSM_4444);
+    delete resized_background;
+    if (converted_background == nullptr) return;
+    printf("Converted background to ABGR4444\n");
+
+    //copy abgr4444 background to vram
+    converted_background->Swizzle();
+    m_background = converted_background->CopyToVram((void *)0x04154000);
+    delete converted_background;
+#else
+    //copy abgr8888 background to vram
+    resized_background->Swizzle();
     m_background = resized_background->CopyToVram((void *)0x04154000);
-    //m_background = resized_background;
+    delete resized_background;
+#endif
+
+    if (m_background == nullptr) return;
     m_background->minimizing_filter = GU_LINEAR;
     m_background->magnifying_filter = GU_LINEAR;
-
-    delete resized_background;
-    delete background;
 }
 
 
