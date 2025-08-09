@@ -10,6 +10,12 @@
 // Normal
 // Position
 
+typedef struct Vertex_XYZ32 {
+    float x, y, z;
+
+    static constexpr int flags = GU_VERTEX_32BITF;
+} Vertex_XYZ32;
+
 typedef struct Vertex_Color32_XYZ32 {
     unsigned int color; //requires 'sceGuShadeModel(GU_SMOOTH);' in init, expect GU_COLOR_8888 in sceGumDrawArray
     float x, y, z; //Expect GU_VERTEX_32BITF in sceGumDrawArray

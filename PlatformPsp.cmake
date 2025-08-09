@@ -74,6 +74,8 @@ add_executable(${PROJECT_NAME} src/main_Psp.cpp
         src/BeatmapPlayer/BeatmapLoader.h
         src/Platform/Psp/Graphics/TextureConvert.cpp
         src/Platform/Psp/Graphics/TextureConvert.h
+        src/Platform/Psp/FrameTimesInfo.cpp
+        src/Platform/Psp/FrameTimesInfo.h
 )
 
 # TODO: remove all the unnecessary stuff

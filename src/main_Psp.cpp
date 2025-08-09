@@ -32,42 +32,26 @@ int main(int argc, const char *argv[]) {
     //NOTE: this assumes that the map file exists
     SceneManager *scene_manager = new SceneManager(BeatmapLoader::LoadFromFile<BeatmapPlayerPsp>("res/maps/circles/KIRA - Circles (feat. GUMI) (Amasugi) [Melancholy].osu"));
 
-    u64 tick_postdraw_previous = 0;
-    u64 tick_preinput = 0;
-    u64 tick_preupdate = 0;
-    u64 tick_predraw = 0;
-    u64 tick_postdraw = 0;
     std::queue<InputEvent> input_queue;
     while (ShouldClose()) {
-        tick_postdraw_previous = tick_postdraw;
-
-        sceRtcGetCurrentTick(&tick_preinput);
-
         PollInputEvents(input_queue);
         while (!input_queue.empty()) {
             scene_manager->HandleInput(input_queue.front());
             input_queue.pop();
         }
 
-        sceRtcGetCurrentTick(&tick_preupdate);
         scene_manager->Update(GetDeltaTime());
 
-        sceRtcGetCurrentTick(&tick_predraw);
         StartFrame();
 
         clearBackground(0xFF000000);
 
         scene_manager->Draw();
-        sceRtcGetCurrentTick(&tick_postdraw);
 
-        char fps_buf[70];
-        snprintf(fps_buf, sizeof(fps_buf), "FPS %.0f\nW %llu\nI %llu\nU %llu\nD %llu",
-            GetFPS(),
-            tick_preinput-tick_postdraw_previous, //wait time
-            tick_preupdate-tick_preinput, //input time
-            tick_predraw-tick_preupdate, //update time
-            tick_postdraw-tick_predraw); //draw time
+        char fps_buf[32];
+        snprintf(fps_buf, sizeof(fps_buf), "FPS %.0f", GetFPS()); //draw time
         DrawText(fps_buf, g_default_font, {SCREEN_WIDTH-80, 2.f}, 0.f, 1, 0xFF00AA00);
+        DrawFrameTimesInfo(GetPreviousFrameTimesInfo(), {2.f, 2.f}, 0.f, 200.f);
         //SetLastFrameTimeToNow();
         EndFrame();
     }

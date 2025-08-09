@@ -15,6 +15,9 @@
 #include "../../Platform/Psp/Graphics/Texture.h"
 #include "../../Platform/Psp/Graphics/Vertex.h"
 
+//uncomment this to convert the taiko skin to ABGR4444
+//#define TAIKO_SHEET_ABGR4444
+
 #define PLAYFIELD_WIDTH SCREEN_WIDTH
 #define PLAYFIELD_HEIGHT 64.f
 #define PLAYFIELD_ORIGIN_Y ((SCREEN_HEIGHT - PLAYFIELD_HEIGHT)/2.f)
@@ -30,6 +33,12 @@ static RulesetInput s_taiko_inputs_psp[] = {
 };
 static const int s_taiko_input_count = sizeof(s_taiko_inputs_psp) / sizeof(RulesetInput);
 
+static uint32_t s_taiko_colors_psp[] = {
+    0xFF374FFF, //center (red) ff4f37
+    0xFFFF9523, //side (blue) 2395ff
+};
+
+
 TaikoRulesetPsp::TaikoRulesetPsp() : TaikoRuleset(s_taiko_inputs_psp, s_taiko_input_count), m_taiko_sheet(nullptr), m_keys_opacity{}, m_audio(nullptr) {
 }
 
@@ -43,8 +52,19 @@ TaikoRulesetPsp::~TaikoRulesetPsp() {
 bool TaikoRulesetPsp::LoadResourcesInternal() {
     if (!TaikoRuleset::LoadResourcesInternal()) return false;
 
-    m_taiko_sheet = Texture::Load("res/skin/Taiko/sheet.png");
-    if (m_taiko_sheet == nullptr) return false;
+    Texture *taiko_sheet_abgr8888 = Texture::Load("res/skin/Taiko/sheet.png");
+    if (taiko_sheet_abgr8888 == nullptr) return false;
+
+#ifdef TAIKO_SHEET_ABGR4444
+    Texture *taiko_sheet_abgr4444 = taiko_sheet_abgr8888->CopyAndConvert(GU_PSM_4444);
+    if (taiko_sheet_abgr4444 == nullptr) m_taiko_sheet = taiko_sheet_abgr8888; //failed to convert, fall back to ABGR8888
+    else {
+        delete taiko_sheet_abgr8888;
+        m_taiko_sheet = taiko_sheet_abgr4444;
+    }
+#else
+    m_taiko_sheet = taiko_sheet_abgr8888;
+#endif
     m_taiko_sheet->Swizzle();
     m_taiko_sheet->minimizing_filter = GU_LINEAR;
     m_taiko_sheet->magnifying_filter = GU_LINEAR;
@@ -165,7 +185,8 @@ void TaikoRulesetPsp::DrawLeftPart() {
         key_display_indices[5] = 2;
 
         uint8_t alpha = (uint8_t)(255.f*m_keys_opacity[i]);
-        sceGuColor(alpha<<24 | 0xFFFFFF);
+        uint32_t color = ((i < 2) ? s_taiko_colors_psp[0] : s_taiko_colors_psp[1]) & 0xFFFFFF;
+        sceGuColor(alpha<<24 | color);
         sceGumDrawArray(GU_TRIANGLES, Vertex_UV32_XYZ32::flags | GU_INDEX_8BIT | GU_TRANSFORM_3D, 6, key_display_indices, key_display_vertices);
     }
 
@@ -310,7 +331,7 @@ bool TaikoRulesetPsp::GetHitVertices(int current_time, TaikoHit *taiko_hit, Vert
     if (normalized_position >= 1.f) return false;
 
     float size = taiko_hit->IsStrong() ? 60.f : 45.f;
-    uint32_t color = taiko_hit->IsBlue() ? 0xFFFF0000 : 0xFF0000FF;
+    uint32_t color = taiko_hit->IsBlue() ? s_taiko_colors_psp[1] : s_taiko_colors_psp[0];
 
     //x and y position of the top left of the hit
     float x = RECEPTOR_CENTER_X + normalized_position*OBJECT_TRAVEL_DISTANCE - size/2.f;

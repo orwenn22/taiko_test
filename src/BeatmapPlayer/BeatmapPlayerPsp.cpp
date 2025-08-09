@@ -43,7 +43,7 @@ void BeatmapPlayerPsp::Draw() {
     int rating_count = m_ruleset->GetRatingCount();
 
     //draw judgements at the top
-    int y = 2;
+    int y = 6;
     for (int i = 0; i < rating_count; i++) {
         snprintf(buf, 256, "%s \x1\xff\xff\xff%d", ratings[i].name, m_judgements[i]);
         DrawText(buf, g_default_font, {2.f, (float)y}, 0.f, 1.f, ratings[i].color);
@@ -81,6 +81,7 @@ void BeatmapPlayerPsp::Draw() {
 static constexpr int background_width = SCREEN_WIDTH;
 static constexpr int background_height = SCREEN_HEIGHT;
 
+//TODO: move most of this logic in a function, and make it possible to specify any path
 void BeatmapPlayerPsp::LoadBackground() {
     if ( m_beatmap == nullptr) return;
     if (m_beatmap->GetBackground() == nullptr) return; //no background

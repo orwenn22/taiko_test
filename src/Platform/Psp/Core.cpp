@@ -10,6 +10,7 @@
 #include <psprtc.h>
 #include <pspthreadman.h>
 
+#include "FrameTimesInfo.h"
 #include "Audio/AudioThread.h"
 #include "Graphics/2d.h"
 #include "Graphics/Font.h"
@@ -17,6 +18,8 @@
 //We want to update the FPS counter every .1 second (100k ticks)
 #define FPS_UPDATE_INTERVAL 100000
 #define FPS_MULTIPLIER (1000000.f/FPS_UPDATE_INTERVAL)
+
+static FrameTimesInfo s_completed_frame_info, s_ongoing_frame_info;
 
 static u64 s_last_tick = 0; //store when was the last time the fps counter was updated
 static int s_frame_count = 0; //store the number of frames that occurred since s_last_tick
@@ -124,8 +127,11 @@ void InitCore(int draw_buffer_psm) {
 
 int ShouldClose() {
     if (s_running) {
+        s_completed_frame_info = s_ongoing_frame_info;
+
         UpdateTime();
         //UpdateInputState();
+        sceRtcGetCurrentTick(&s_ongoing_frame_info.frame_start);
     }
     return s_running;
 }
@@ -142,13 +148,21 @@ void EndCore() {
 
 void StartFrame() {
     sceGuStart(GU_DIRECT, list);
+    sceRtcGetCurrentTick(&s_ongoing_frame_info.frame_start_draw);
 }
 
 void EndFrame() {
+    sceRtcGetCurrentTick(&s_ongoing_frame_info.frame_end_draw);
+
     sceGuFinish();
     sceGuSync(0, 0);
+
+    sceRtcGetCurrentTick(&s_ongoing_frame_info.frame_end_gpu_execute);
+
     sceDisplayWaitVblankStart();
     sceGuSwapBuffers();
+
+    sceRtcGetCurrentTick(&s_ongoing_frame_info.frame_end);
 }
 
 void UpdateTime() {
@@ -174,3 +188,7 @@ void UpdateTime() {
 
 float GetFPS() { return s_fps; }
 float GetDeltaTime() { return s_dt; }
+
+FrameTimesInfo GetPreviousFrameTimesInfo() {
+    return s_completed_frame_info;
+}

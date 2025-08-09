@@ -6,8 +6,9 @@
 #define SCREEN_WIDTH 480
 #define SCREEN_HEIGHT BUFFER_HEIGHT
 
-struct Font;
+#include "FrameTimesInfo.h"
 
+struct Font;
 extern Font *g_default_font;
 
 void InitCore(int draw_buffer_psm);
@@ -21,5 +22,7 @@ void EndFrame();
 void UpdateTime();
 float GetFPS();
 float GetDeltaTime();
+
+FrameTimesInfo GetPreviousFrameTimesInfo();
 
 #endif //CORE_H
