@@ -12,4 +12,3 @@ psp port:
 - [pspsdk](https://pspdev.github.io/)
 - [minimp3](https://github.com/lieff/minimp3) (included in the repo, CC0 license)
 - [stb_vorbis.c](https://github.com/nothings/stb/blob/master/stb_vorbis.c) (included in the repo, MIT/public domain dual-licensed)
-- 

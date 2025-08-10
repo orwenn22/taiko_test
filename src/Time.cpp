@@ -3,7 +3,7 @@
 #include <chrono>
 #include <mutex>
 
-#include "Config.h"
+#include "Raylib/Config.h"
 
 static std::chrono::steady_clock::time_point s_last_frame_time;
 
