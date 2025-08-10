@@ -76,6 +76,8 @@ add_executable(${PROJECT_NAME} src/Psp/main_Psp.cpp
         src/Psp/Platform/Graphics/TextureConvert.h
         src/Psp/Platform/FrameTimesInfo.cpp
         src/Psp/Platform/FrameTimesInfo.h
+        src/Psp/ConfigPsp.h
+        src/Psp/Input/InputHandling_Multithread.cpp
 )
 
 # TODO: remove all the unnecessary stuff

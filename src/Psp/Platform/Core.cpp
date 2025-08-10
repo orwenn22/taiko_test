@@ -108,7 +108,7 @@ void InitCore(int draw_buffer_psm) {
     setup_callbacks();
 
     // Input-related stuff
-    sceCtrlSetSamplingCycle(0);
+    sceCtrlSetSamplingCycle(5555); //usually 0, but this allows checking for inputs 3 times per frame
     sceCtrlSetSamplingMode(PSP_CTRL_MODE_ANALOG);
 
     // Setup audio
@@ -126,7 +126,7 @@ void InitCore(int draw_buffer_psm) {
     g_default_font = Font::FromPath("res/def_font.png", 8, 19);
 
     g_pico_font = Font::FromPath("res/pico8_font.png", 8, 8);
-    g_pico_font->char_spacing_x = 4;
+    if (g_pico_font != nullptr) g_pico_font->char_spacing_x = 4;
 }
 
 int ShouldClose() {

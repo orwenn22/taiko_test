@@ -1,3 +1,6 @@
+#include "../ConfigPsp.h"
+#if PSP_INPUT_SINGLE_THREAD
+
 #include <pspctrl.h>
 
 #include "../../Base/Input/InputHandling.h"
@@ -28,3 +31,5 @@ int GetInputThreadIterations() {
 
 void InitInputHandling() { /* nothing */ }
 void CloseInputHandling() { /* nothing */ }
+
+#endif

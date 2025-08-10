@@ -52,8 +52,10 @@ int main(int argc, const char *argv[]) {
         char fps_buf[32];
         snprintf(fps_buf, sizeof(fps_buf), "FPS %.0f", GetFPS()); //draw time
         DrawText(fps_buf, g_default_font, {SCREEN_WIDTH-80, 2.f}, 0.f, 1, 0xFF00AA00);
+        snprintf(fps_buf, sizeof(fps_buf), "IPF %i", GetInputThreadIterations());
+        DrawText(fps_buf, g_default_font, {SCREEN_WIDTH-80, 22.f}, 0.f, 1, 0xFF00AA00);
         DrawFrameTimesInfo(GetPreviousFrameTimesInfo(), {2.f, 2.f}, 0.f, 200.f);
-        //SetLastFrameTimeToNow();
+
         EndFrame();
     }
 
