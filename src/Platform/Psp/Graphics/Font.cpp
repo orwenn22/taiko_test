@@ -2,7 +2,10 @@
 
 #include "Texture.h"
 
-Font::Font(Texture *texture, int char_width, int char_height, bool should_free_texture) : texture(texture), should_free_texture(should_free_texture), char_width(char_width), char_height(char_height) {
+Font::Font(Texture *texture, int char_width, int char_height, bool should_free_texture)
+    : texture(texture), should_free_texture(should_free_texture),
+      char_width(char_width), char_height(char_height),
+      char_spacing_x(char_width) {
     char_count_x = texture->w / char_width;
     char_count_y = texture->h / char_height;
     char_count = char_count_x * char_count_y;

@@ -9,6 +9,7 @@ struct Font {
     bool should_free_texture;
     int char_width, char_height;
     int char_count_x, char_count_y, char_count;
+    int char_spacing_x;
 
     ~Font();
 

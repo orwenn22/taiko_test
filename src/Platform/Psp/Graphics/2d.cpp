@@ -177,7 +177,7 @@ void DrawText(const char *text, Font *font, const Vector2<float> &pos, float z, 
 
             ++char_count;
             ++i;
-            pos_offset.x += font->char_width * scale;
+            pos_offset.x += font->char_spacing_x * scale;
         }
 
         //in the case we reached the end of the string and don't have a group of 5 chars we need to clear the

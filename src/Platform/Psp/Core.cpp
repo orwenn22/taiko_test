@@ -31,6 +31,7 @@ static float s_dt = 1.f/60.f;
 
 char list[0x20000] __attribute__((aligned(64)));
 Font *g_default_font = nullptr;
+Font *g_pico_font = nullptr;
 static int s_running = 1;
 
 
@@ -123,6 +124,9 @@ void InitCore(int draw_buffer_psm) {
 
     // Load default resources
     g_default_font = Font::FromPath("res/def_font.png", 8, 19);
+
+    g_pico_font = Font::FromPath("res/pico8_font.png", 8, 8);
+    g_pico_font->char_spacing_x = 4;
 }
 
 int ShouldClose() {
@@ -137,6 +141,9 @@ int ShouldClose() {
 }
 
 void EndCore() {
+    delete g_pico_font;
+    g_pico_font = nullptr;
+
     delete g_default_font;
     g_default_font = nullptr;
 

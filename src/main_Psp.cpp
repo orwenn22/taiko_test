@@ -31,6 +31,7 @@ int main(int argc, const char *argv[]) {
 
     //NOTE: this assumes that the map file exists
     SceneManager *scene_manager = new SceneManager(BeatmapLoader::LoadFromFile<BeatmapPlayerPsp>("res/maps/circles/KIRA - Circles (feat. GUMI) (Amasugi) [Melancholy].osu"));
+    //SceneManager *scene_manager = new SceneManager(BeatmapLoader::LoadFromFile<BeatmapPlayerPsp>("res/maps/null_spec/null_spec.osu"));
 
     std::queue<InputEvent> input_queue;
     while (ShouldClose()) {

@@ -10,6 +10,7 @@
 
 struct Font;
 extern Font *g_default_font;
+extern Font *g_pico_font;
 
 void InitCore(int draw_buffer_psm);
 int ShouldClose();
