@@ -18,6 +18,8 @@ void PollInputEvents(std::queue<InputEvent> &input_queue) {
 
 }
 
+void SetLastPollTimeToNow() { /* nothing */ }
+
 //Get the number of iterations the input thread performed since the last time that function was called.
 //This is mostly meant for debugging and should probably go away in the future
 int GetInputThreadIterations() {

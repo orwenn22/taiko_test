@@ -10,21 +10,30 @@
 #include <thread>
 
 #include "../main.h"
-#include "../../Time.h"
 
 static std::thread s_input_thread;
 
 static int *s_keys = nullptr; //Store all the keys we should check
 static size_t s_count = 0; //Store the amount of keys in the array above
 static std::queue<InputEvent> s_input_queue; //This is how the input thread send stuff to the main thread
+static std::chrono::steady_clock::time_point s_last_poll_time;
 static std::mutex s_keys_mutex; //Mutex for all the things above
 
 static std::atomic<int> s_input_thread_iterations(0);
 
+
+//Returns the time since the last time PullInput() was called in ms
+//(should be called only from the input thread)
+static uint64_t GetTimestampSinceLastPull() {
+    return std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::steady_clock::now() - s_last_poll_time
+    ).count();
+}
+
 static void CheckAllKeys() {
     for (int i = 0; i < 128; ++i) {
         if (IsKeyPressed(i)) {
-            s_input_queue.emplace(i, GetTimestampSinceLastFrameMs());
+            s_input_queue.emplace(i, GetTimestampSinceLastPull());
         }
     }
 }
@@ -32,7 +41,7 @@ static void CheckAllKeys() {
 static void CheckSpecifiedKeys() {
     for (size_t i = 0; i < s_count; ++i) {
         if (IsKeyPressed(s_keys[i])) {
-            s_input_queue.push(InputEvent(s_keys[i], GetTimestampSinceLastFrameMs()));
+            s_input_queue.push(InputEvent(s_keys[i], GetTimestampSinceLastPull()));
         }
     }
 }
@@ -70,6 +79,14 @@ void PollInputEvents(std::queue<InputEvent> &input_queue) {
         input_queue.push(s_input_queue.front());
         s_input_queue.pop();
     }
+
+    s_last_poll_time = std::chrono::steady_clock::now();
+}
+
+
+void SetLastPollTimeToNow() {
+    std::lock_guard<std::mutex> lock(s_keys_mutex);
+    s_last_poll_time = std::chrono::steady_clock::now();
 }
 
 
@@ -81,6 +98,7 @@ int GetInputThreadIterations() {
 
 
 void InitInputHandling() {
+    s_last_poll_time = std::chrono::steady_clock::now();
     s_input_thread = std::thread(InputThreadMain);
 }
 

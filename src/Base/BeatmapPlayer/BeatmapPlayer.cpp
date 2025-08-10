@@ -63,7 +63,7 @@ void BeatmapPlayer::HandleInput(const InputEvent &input) {
 
     //TODO: maybe in the case of multithreading we should add dt to the input's timestamp?
     int press_time = last_time_ms+(int)input.timestamp_ms;
-    //printf("press_time: %d ms\n", press_time);
+    //printf("press_time: %d ms (poll + %lu ms)\n", press_time, input.timestamp_ms);
 
     for (int i = 0; i < m_ruleset->m_input_count; ++i) {
         if (input.key == (int) m_ruleset->m_inputs[i].key) m_ruleset->HandleInput({m_ruleset->m_inputs[i].action, press_time});

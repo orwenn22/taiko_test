@@ -1,13 +1,12 @@
 #include <atomic>
 #include <chrono>
 #include <cstring>
+#include <raylib.h>
 #include <thread>
 #include <bits/shared_ptr_atomic.h>
 
 #include "Config.h"
 #include "../Base/Input/InputHandling.h"
-#include "raylib.h"
-#include "../Time.h"
 #include "../Base/BeatmapPlayer/BeatmapLoader.h"
 #include "BeatmapPlayer/BeatmapPlayerRaylib.h"
 #include "../Base/MapIndex/MapIndexFile.h"
@@ -38,9 +37,6 @@ int main(int argc, const char *argv[]) {
     //if (!MapIndexExist()) {
         GenerateMapIndexFile("./res/maps");
     //}
-
-
-    SetLastFrameTimeToNow();
 
     //SetConfigFlags(FLAG_WINDOW_RESIZABLE); //crashes on multithreaded mode, let's not do that
     InitWindow(960, 540, "taco test");
@@ -75,7 +71,6 @@ int main(int argc, const char *argv[]) {
         //DrawText(TextFormat("%d IPF", input_iterations), 90, 10, 20, GREEN);
 #endif
 
-        SetLastFrameTimeToNow();
         EndDrawing(); //This calls it what makes this tread wait in order to reach the target framerate, therefore we should call SetLastFrameTimeToNow() right before (actually maybe it could be called at the end of PollInputEvents()? idk)
     }
 

@@ -50,6 +50,8 @@ void PollInputEvents(std::queue<InputEvent> &input_queue) {
     }
 }
 
+void SetLastPollTimeToNow() { /* nothing */ }
+
 int GetInputThreadIterations() {
     return 0;
 }

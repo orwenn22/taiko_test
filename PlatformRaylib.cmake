@@ -32,8 +32,6 @@ add_executable(${PROJECT_NAME} src/Raylib/main.cpp
         src/Base/Input/InputHandling.h
         src/Raylib/main.h
         src/Raylib/Config.h
-        src/Time.cpp
-        src/Time.h
         src/Base/Beatmap/TaikoBeatmap/TaikoTimingPoint.cpp
         src/Base/Beatmap/TaikoBeatmap/TaikoTimingPoint.h
         src/Base/Beatmap/TaikoBeatmap/TaikoDrumRoll.cpp
